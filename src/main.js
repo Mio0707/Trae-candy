@@ -1,91 +1,88 @@
 import { BeastStage, FORTUNES } from './BeastStage.js';
 import { GestureInput } from './GestureInput.js';
-import { getStep, matchesStepGesture } from './stage-content.js';
+import { getStep, matchesStepGesture, getPhaseIndex } from './stage-content.js';
 import modelUrl from './assets/hulushi-web.glb?url';
 
-const PHASES = [
-  { id: 'base', name: '底座', stepIds: ['base-small'] },
-  { id: 'body', name: '身体', stepIds: ['body-block'] },
-  { id: 'limbs', name: '四肢', stepIds: ['front-legs', 'back-mustache'] },
-  { id: 'head', name: '头部', stepIds: ['head-block', 'head-place'] },
-  { id: 'decoration', name: '装饰', stepIds: ['tail', 'ears', 'head-lines', 'ball-form', 'ball-place'] },
-  { id: 'blessing', name: '赐福', stepIds: ['complete', 'lift-blessing', 'fortune-shell', 'blessing-complete'] },
-];
-
-function getPhaseIndex(stepId) {
-  for (let i = 0; i < PHASES.length; i++) {
-    if (PHASES[i].stepIds.includes(stepId)) return i;
-  }
-  return 0;
-}
-
 // ---- DOM refs ----
-let introOverlay, app, btnEnter, stageContainer;
-let stepTitle, stepDesc, knowledgeBubble, knowledgeText, stageHint;
-let btnNext, btnReset, btnScreen, btnShare, btnResetBottom, completeSection;
-let fortuneDisplay, fortuneLabel, fortuneName, fortuneBlessing;
+let landing, stagePage, btnModeCamera, btnModeButton, stageContainer;
+let stepTitle, stepDesc, stepOverlay, knowledgeFloat, knowledgeText;
+let btnNext, btnReset, btnScreen, btnShare, btnResetBottom;
+let completeOverlay, fortuneDisplay, fortuneLabel, fortuneName, fortuneBlessing;
 let loadingIndicator, modelError, errorMessage;
-let progressDots, progressNames;
-let videoPreview, gestureStatus, btnCamera, gestureHint;
-
-function queryDOM() {
-  introOverlay = document.getElementById('intro-overlay');
-  app = document.getElementById('app');
-  btnEnter = document.getElementById('btn-enter');
-  stageContainer = document.getElementById('beast-stage');
-
-  stepTitle = document.getElementById('step-title');
-  stepDesc = document.getElementById('step-desc');
-  knowledgeBubble = document.getElementById('knowledge-bubble');
-  knowledgeText = document.getElementById('knowledge-text');
-  stageHint = document.getElementById('stage-hint');
-  btnNext = document.getElementById('btn-next');
-  btnReset = document.getElementById('btn-reset');
-  btnScreen = document.getElementById('btn-screen');
-  btnShare = document.getElementById('btn-share');
-  btnResetBottom = document.getElementById('btn-reset-bottom');
-  completeSection = document.getElementById('complete-section');
-  fortuneDisplay = document.getElementById('fortune-display');
-  fortuneLabel = document.getElementById('fortune-label');
-  fortuneName = document.getElementById('fortune-name');
-  fortuneBlessing = document.getElementById('fortune-blessing');
-  loadingIndicator = document.getElementById('loading-indicator');
-  modelError = document.getElementById('model-error');
-  errorMessage = document.getElementById('error-message');
-  progressDots = document.querySelectorAll('.stage-dot');
-  progressNames = document.querySelectorAll('.stage-name');
-
-  videoPreview = document.getElementById('video-preview');
-  gestureStatus = document.getElementById('gesture-status');
-  btnCamera = document.getElementById('btn-camera');
-  gestureHint = document.getElementById('gesture-hint');
-}
+let progDots;
+let videoPreview, gestureStatus, gestureHint, btnCamera;
+let stageTitle;
 
 let stage = null;
 let gestureInput = null;
 let currentStep = null;
 let currentFortune = null;
 let cameraActive = false;
+let interactionMode = null; // 'camera' | 'button'
+let stepOverlayTimer = null;
 
-// ---- Enter ----
+function queryDOM() {
+  landing = document.getElementById('landing');
+  stagePage = document.getElementById('stage-page');
+  btnModeCamera = document.getElementById('btn-mode-camera');
+  btnModeButton = document.getElementById('btn-mode-button');
+  stageContainer = document.getElementById('beast-stage');
+
+  stepTitle = document.getElementById('step-title');
+  stepDesc = document.getElementById('step-desc');
+  stepOverlay = document.getElementById('step-overlay');
+  knowledgeFloat = document.getElementById('knowledge-float');
+  knowledgeText = document.getElementById('knowledge-text');
+  btnNext = document.getElementById('btn-next');
+  btnReset = document.getElementById('btn-reset');
+  btnScreen = document.getElementById('btn-screen');
+  btnShare = document.getElementById('btn-share');
+  btnResetBottom = document.getElementById('btn-reset-bottom');
+  completeOverlay = document.getElementById('complete-overlay');
+  fortuneLabel = document.getElementById('fortune-label');
+  fortuneName = document.getElementById('fortune-name');
+  fortuneBlessing = document.getElementById('fortune-blessing');
+  loadingIndicator = document.getElementById('loading-indicator');
+  modelError = document.getElementById('model-error');
+  errorMessage = document.getElementById('error-message');
+  progDots = document.querySelectorAll('.prog-dot');
+
+  videoPreview = document.getElementById('video-preview');
+  gestureStatus = document.getElementById('gesture-status');
+  gestureHint = document.getElementById('gesture-hint');
+  btnCamera = document.getElementById('btn-camera');
+  stageTitle = document.getElementById('stage-title');
+}
+
+// ---- Init ----
 queryDOM();
-btnEnter.addEventListener('click', () => {
-  introOverlay.classList.add('hidden');
-  app.classList.add('active');
-  initStage();
-});
+
+// Landing page: mode selection
+btnModeCamera.addEventListener('click', () => enterStage('camera'));
+btnModeButton.addEventListener('click', () => enterStage('button'));
+
+async function enterStage(mode) {
+  interactionMode = mode;
+
+  // Fade out landing
+  landing.classList.add('out');
+
+  // Show stage page
+  setTimeout(() => {
+    stagePage.classList.add('active');
+    initStage();
+  }, 400);
+}
 
 async function initStage() {
   try {
-    stage = new BeastStage(stageContainer, {
-      modelUrl: modelUrl,
-    });
+    stage = new BeastStage(stageContainer, { modelUrl });
 
     stage.addEventListener('stepchange', onStepChange);
     stage.addEventListener('interactionchange', (e) => {
       const locked = e.detail.interactionLocked;
       btnNext.disabled = locked;
-      btnNext.textContent = locked ? '进行中…' : '继续造物';
+      btnNext.textContent = locked ? '…' : '继续';
     });
 
     loadingIndicator.classList.remove('hidden');
@@ -93,8 +90,13 @@ async function initStage() {
     loadingIndicator.classList.add('hidden');
     updateUI(stage.getState());
 
-    // Init gesture input after model loads
+    // Init gesture input
     initGestureInput();
+
+    // If camera mode, auto-start camera
+    if (interactionMode === 'camera') {
+      await startCamera();
+    }
   } catch (err) {
     console.error('[BeastStage] 模型加载失败:', err);
     loadingIndicator.classList.add('hidden');
@@ -128,22 +130,46 @@ function initGestureInput() {
       if (gestureStatus) {
         gestureStatus.textContent = status.message || '';
       }
-      // 粒子跟随手部位置 — 只要有手就设置目标
       if (stage && status.hand) {
         stage.setBlessingHandTarget(status.hand.normalizedX, status.hand.normalizedY);
       } else if (stage) {
         stage.clearBlessingHandTarget();
       }
-      // 托起手势预览进度
       if (stage && status.liftState) {
         stage.setGesturePreview(status.liftState.progress || 0);
       }
     },
   });
 
-  // Camera toggle
+  // Camera toggle button
   if (btnCamera) {
     btnCamera.addEventListener('click', toggleCamera);
+  }
+}
+
+// ---- Camera ----
+async function startCamera() {
+  if (!gestureInput || cameraActive) return;
+  const cameraBg = document.getElementById('camera-bg');
+  const cameraBgOverlay = document.getElementById('camera-bg-overlay');
+
+  try {
+    await gestureInput.init();
+    cameraActive = true;
+    if (btnCamera) btnCamera.textContent = '📷✓';
+    updateGestureHint();
+    if (currentStep) updateGestureStep(currentStep);
+    // Bind camera stream to background
+    if (cameraBg && videoPreview.srcObject) {
+      cameraBg.srcObject = videoPreview.srcObject;
+      cameraBg.play().catch(() => {});
+      cameraBg.classList.add('active');
+      if (cameraBgOverlay) cameraBgOverlay.classList.add('active');
+    }
+  } catch (err) {
+    console.error('[Gesture] 摄像头启动失败:', err);
+    const message = err?.message || '摄像头启动失败，请确保已授予摄像头权限。';
+    if (gestureStatus) gestureStatus.textContent = message;
   }
 }
 
@@ -155,48 +181,38 @@ async function toggleCamera() {
   if (cameraActive) {
     gestureInput.stop();
     cameraActive = false;
-    if (btnCamera) btnCamera.textContent = '开启摄像头';
+    if (btnCamera) btnCamera.textContent = '📷';
     if (gestureStatus) gestureStatus.textContent = '';
     if (gestureHint) gestureHint.textContent = '';
-    // 隐藏摄像头背景
     if (cameraBg) { cameraBg.classList.remove('active'); cameraBg.srcObject = null; }
     if (cameraBgOverlay) cameraBgOverlay.classList.remove('active');
   } else {
-    try {
-      await gestureInput.init();
-      cameraActive = true;
-      if (btnCamera) btnCamera.textContent = '关闭摄像头';
-      updateGestureHint();
-      // 通知手势系统当前步骤
-      if (currentStep) updateGestureStep(currentStep);
-      // 将摄像头流绑定到背景视频
-      if (cameraBg && videoPreview.srcObject) {
-        cameraBg.srcObject = videoPreview.srcObject;
-        cameraBg.play().catch(() => {});
-        cameraBg.classList.add('active');
-        if (cameraBgOverlay) cameraBgOverlay.classList.add('active');
-      }
-    } catch (err) {
-      console.error('[Gesture] 摄像头启动失败:', err);
-      const message = err?.message || '摄像头启动失败，请确保已授予摄像头权限。';
-      if (gestureStatus) gestureStatus.textContent = message;
-    }
+    await startCamera();
   }
 }
 
+function stopCamera() {
+  if (!cameraActive || !gestureInput) return;
+  gestureInput.stop();
+  cameraActive = false;
+  const cameraBg = document.getElementById('camera-bg');
+  const cameraBgOverlay = document.getElementById('camera-bg-overlay');
+  if (btnCamera) btnCamera.textContent = '📷';
+  if (gestureStatus) gestureStatus.textContent = '';
+  if (gestureHint) gestureHint.textContent = '';
+  if (cameraBg) { cameraBg.classList.remove('active'); cameraBg.srcObject = null; }
+  if (cameraBgOverlay) cameraBgOverlay.classList.remove('active');
+}
+
+// ---- Gesture step tracking ----
 function updateGestureHint() {
   if (!gestureHint || !currentStep) return;
   const stepConfig = getStep(currentStep.id);
   if (stepConfig && stepConfig.gesture && stepConfig.gesture.recognitionHint) {
-    gestureHint.textContent = `手势：${stepConfig.gesture.recognitionHint}`;
+    gestureHint.textContent = stepConfig.gesture.recognitionHint;
   } else {
     gestureHint.textContent = '';
   }
-}
-
-function onStepChange(e) {
-  updateUI(e.detail);
-  updateGestureStep(e.detail.step);
 }
 
 function updateGestureStep(step) {
@@ -212,77 +228,77 @@ function updateGestureStep(step) {
   });
 }
 
+// ---- Step change ----
+function onStepChange(e) {
+  updateUI(e.detail);
+  updateGestureStep(e.detail.step);
+}
+
 function updateUI(state) {
   const step = state.step;
   const fortune = state.selectedFortune;
   currentStep = step;
   currentFortune = fortune;
 
-  // Title & description
-  stepTitle.textContent = step.title || '';
-  stepDesc.textContent = step.description || '';
+  // Step overlay: show title + desc briefly, then fade out
+  if (stepTitle) stepTitle.textContent = step.title || '';
+  if (stepDesc) stepDesc.textContent = step.description || '';
+
+  // Show step overlay with fade
+  if (stepOverlay) {
+    stepOverlay.classList.add('visible');
+    clearTimeout(stepOverlayTimer);
+    stepOverlayTimer = setTimeout(() => {
+      stepOverlay.classList.remove('visible');
+    }, 3000);
+  }
 
   // Knowledge bubble
   if (step.knowledge) {
-    knowledgeBubble.classList.remove('hidden');
     knowledgeText.textContent = step.knowledge;
-    // Re-trigger animation
-    knowledgeBubble.style.animation = 'none';
-    requestAnimationFrame(() => {
-      knowledgeBubble.style.animation = 'bubbleIn 0.5s ease forwards';
-    });
+    knowledgeFloat.classList.add('visible');
   } else {
-    knowledgeBubble.classList.add('hidden');
+    knowledgeFloat.classList.remove('visible');
   }
 
-  // Stage hint
-  stageHint.textContent = step.description ? `提示：${step.description}` : '';
-
-  // Gesture hint update
+  // Gesture hint
   if (cameraActive) {
     updateGestureHint();
   }
 
   // Progress dots
   const phaseIndex = getPhaseIndex(step.id);
-  progressDots.forEach((dot, i) => {
+  progDots.forEach((dot, i) => {
+    const phase = parseInt(dot.dataset.phase);
     dot.classList.remove('active', 'completed');
-    if (i < phaseIndex) dot.classList.add('completed');
-    else if (i === phaseIndex) dot.classList.add('active');
+    if (phase < phaseIndex) dot.classList.add('completed');
+    else if (phase === phaseIndex) dot.classList.add('active');
   });
 
-  // Fortune display
+  // Fortune / complete
   if (step.id === 'blessing-complete' && fortune) {
-    completeSection.classList.remove('hidden');
+    completeOverlay.classList.add('visible');
     fortuneLabel.textContent = fortune.label;
     fortuneName.textContent = fortune.name;
     fortuneBlessing.textContent = fortune.blessing;
     fortuneLabel.style.color = fortune.color ? '#' + fortune.color.toString(16).padStart(6, '0') : '#d73327';
-    fortuneDisplay.classList.remove('hidden');
   } else {
-    fortuneDisplay.classList.add('hidden');
-    completeSection.classList.add('hidden');
+    completeOverlay.classList.remove('visible');
   }
 
   // Button state
   const isFinal = step.id === 'blessing-complete';
-  btnNext.textContent = isFinal ? '重新体验' : '继续造物';
+  btnNext.textContent = isFinal ? '重来' : '继续';
   btnNext.disabled = false;
 }
 
-// ---- Button: next / reset ----
+// ---- Buttons ----
 btnNext.addEventListener('click', () => {
   if (!stage) return;
   if (currentStep?.id === 'blessing-complete') {
-    if (cameraActive && gestureInput) {
-      gestureInput.stop();
-      cameraActive = false;
-      if (btnCamera) btnCamera.textContent = '开启摄像头';
-      if (gestureStatus) gestureStatus.textContent = '';
-      if (gestureHint) gestureHint.textContent = '';
-    }
+    stopCamera();
     stage.reset();
-    completeSection.classList.add('hidden');
+    completeOverlay.classList.remove('visible');
     return;
   }
   stage.next();
@@ -290,38 +306,26 @@ btnNext.addEventListener('click', () => {
 
 btnReset.addEventListener('click', () => {
   if (!stage) return;
-  if (cameraActive && gestureInput) {
-    gestureInput.stop();
-    cameraActive = false;
-    if (btnCamera) btnCamera.textContent = '开启摄像头';
-    if (gestureStatus) gestureStatus.textContent = '';
-    if (gestureHint) gestureHint.textContent = '';
-  }
+  stopCamera();
   stage.reset();
-  completeSection.classList.add('hidden');
+  completeOverlay.classList.remove('visible');
 });
 
 btnResetBottom.addEventListener('click', () => {
   if (!stage) return;
-  if (cameraActive && gestureInput) {
-    gestureInput.stop();
-    cameraActive = false;
-    if (btnCamera) btnCamera.textContent = '开启摄像头';
-    if (gestureStatus) gestureStatus.textContent = '';
-    if (gestureHint) gestureHint.textContent = '';
-  }
+  stopCamera();
   stage.reset();
-  completeSection.classList.add('hidden');
+  completeOverlay.classList.remove('visible');
 });
 
-// ---- Fullscreen ----
+// Fullscreen
 btnScreen.addEventListener('click', () => {
-  const el = stageContainer;
+  const el = document.documentElement;
   if (el.requestFullscreen) el.requestFullscreen();
   else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
 });
 
-// ---- Share card ----
+// Share card
 btnShare.addEventListener('click', generateShareCard);
 
 function generateShareCard() {
@@ -336,95 +340,85 @@ function generateShareCard() {
 
   const W = 750, H = 1000;
 
-  // Background
+  // Dark background
   const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, '#FFF8F0');
-  grad.addColorStop(0.5, '#FFFDF5');
-  grad.addColorStop(1, '#FFF8F0');
+  grad.addColorStop(0, '#1a0e08');
+  grad.addColorStop(0.5, '#2a1a10');
+  grad.addColorStop(1, '#1a0e08');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
 
   // Top decorative band
   ctx.fillStyle = '#D73327';
-  ctx.fillRect(0, 0, W, 8);
+  ctx.fillRect(0, 0, W, 6);
   ctx.fillStyle = '#F1BC36';
-  ctx.fillRect(0, 8, W, 4);
+  ctx.fillRect(0, 6, W, 3);
 
   // Bottom decorative band
   ctx.fillStyle = '#F1BC36';
-  ctx.fillRect(0, H - 12, W, 4);
+  ctx.fillRect(0, H - 9, W, 3);
   ctx.fillStyle = '#D73327';
-  ctx.fillRect(0, H - 8, W, 8);
+  ctx.fillRect(0, H - 6, W, 6);
 
   // Title
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#2C1810';
+  ctx.fillStyle = '#f5e6d3';
   ctx.font = 'bold 48px "PingFang SC", "Microsoft YaHei", sans-serif';
-  ctx.fillText('吹糖造物', W / 2, 90);
+  ctx.fillText('吹糖造物', W / 2, 100);
 
   // Subtitle
-  ctx.fillStyle = '#6B5244';
+  ctx.fillStyle = '#a08a72';
   ctx.font = '18px "PingFang SC", "Microsoft YaHei", sans-serif';
-  ctx.fillText('灵感来自国家级非遗 · 天门糖塑', W / 2, 130);
+  ctx.fillText('灵感来自国家级非遗 · 天门糖塑', W / 2, 140);
 
-  // Divider line
-  ctx.strokeStyle = '#E8DDD0';
+  // Divider
+  ctx.strokeStyle = 'rgba(196,154,108,0.3)';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(100, 160);
-  ctx.lineTo(W - 100, 160);
+  ctx.moveTo(100, 170);
+  ctx.lineTo(W - 100, 170);
   ctx.stroke();
 
-  // Capture beast image from renderer
+  // Beast image
   let beastImg = null;
   try {
     if (stage && stage.renderer) {
       const dataUrl = stage.renderer.domElement.toDataURL('image/png');
       const img = new Image();
       img.src = dataUrl;
-      // We'll use it synchronously if loaded, otherwise skip
-      if (img.complete && img.naturalWidth > 0) {
-        beastImg = img;
-      }
+      if (img.complete && img.naturalWidth > 0) beastImg = img;
     }
-  } catch (e) {
-    // continue without image
-  }
+  } catch { /* skip */ }
 
-  // Beast image or placeholder circle
   if (beastImg) {
     ctx.save();
     ctx.beginPath();
-    ctx.arc(W / 2, 310, 140, 0, Math.PI * 2);
+    ctx.arc(W / 2, 320, 140, 0, Math.PI * 2);
     ctx.clip();
-    ctx.drawImage(beastImg, W / 2 - 140, 170, 280, 280);
+    ctx.drawImage(beastImg, W / 2 - 140, 180, 280, 280);
     ctx.restore();
   } else {
-    // Decorative circle
     ctx.beginPath();
-    ctx.arc(W / 2, 310, 130, 0, Math.PI * 2);
-    ctx.fillStyle = '#FFF0E0';
+    ctx.arc(W / 2, 320, 130, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(196,154,108,0.1)';
     ctx.fill();
-    ctx.strokeStyle = '#E8DDD0';
+    ctx.strokeStyle = 'rgba(196,154,108,0.3)';
     ctx.lineWidth = 2;
     ctx.setLineDash([8, 6]);
     ctx.stroke();
     ctx.setLineDash([]);
-
-    // Placeholder text
-    ctx.fillStyle = '#C49A6C';
+    ctx.fillStyle = '#a08a72';
     ctx.font = '16px "PingFang SC", "Microsoft YaHei", sans-serif';
-    ctx.fillText('瑞兽·糖塑', W / 2, 320);
+    ctx.fillText('瑞兽·糖塑', W / 2, 330);
   }
 
   // Fortune circle
-  const circleY = 480;
+  const circleY = 490;
   ctx.beginPath();
   ctx.arc(W / 2, circleY, 72, 0, Math.PI * 2);
   ctx.fillStyle = colorHex;
   ctx.fill();
 
-  // Outer ring
   ctx.strokeStyle = colorHex;
   ctx.lineWidth = 3;
   ctx.setLineDash([6, 4]);
@@ -433,31 +427,22 @@ function generateShareCard() {
   ctx.stroke();
   ctx.setLineDash([]);
 
-  // Fortune big character
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 64px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.fillText(fortune.label, W / 2, circleY + 22);
 
-  // Fortune name
-  ctx.fillStyle = '#2C1810';
+  ctx.fillStyle = '#f5e6d3';
   ctx.font = 'bold 28px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.fillText(fortune.name, W / 2, circleY + 130);
 
-  // Blessing text
-  ctx.fillStyle = '#6B5244';
+  ctx.fillStyle = '#a08a72';
   ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.fillText(fortune.blessing, W / 2, circleY + 175);
 
-  // Bottom info
-  ctx.fillStyle = '#C49A6C';
+  ctx.fillStyle = 'rgba(160,138,114,0.5)';
   ctx.font = '14px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.fillText('天门糖塑 · 国家级非物质文化遗产', W / 2, H - 50);
 
-  ctx.fillStyle = '#B8A898';
-  ctx.font = '12px "PingFang SC", "Microsoft YaHei", sans-serif';
-  ctx.fillText('本体验基于吹、捏、拉、贴等糖塑造型语言进行数字化互动表达', W / 2, H - 28);
-
-  // Download
   const link = document.createElement('a');
   link.download = `吹糖造物_${fortune.label}.png`;
   link.href = canvas.toDataURL('image/png');

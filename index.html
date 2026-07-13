@@ -2,415 +2,574 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>吹糖造物 - 天门糖塑互动体验</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #F6EFE6;
-  --fg: #2C1810;
-  --fg-muted: #6B5244;
-  --red: #D73327;
-  --gold: #F1BC36;
-  --sugar: #C49A6C;
-  --card-bg: #FFF8F0;
-  --bubble-bg: #FFF8E7;
-  --border: #E8DDD0;
+  --bg: #1a0e08;
+  --fg: #f5e6d3;
+  --fg-muted: #a08a72;
+  --red: #d73327;
+  --gold: #f1bc36;
+  --sugar: #c49a6c;
+  --card-bg: rgba(26,14,8,0.85);
+  --border: rgba(196,154,108,0.2);
   --radius: 12px;
-  --shadow: 0 4px 20px rgba(44,24,16,0.08);
 }
 
-html { font-size: 16px; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
 
 body {
   font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
   background: var(--bg);
   color: var(--fg);
-  line-height: 1.7;
-  min-height: 100vh;
-  overflow-x: hidden;
+  line-height: 1.6;
 }
 
 .hidden { display: none !important; }
 
-/* ========== Intro ========== */
-#intro-overlay {
-  position: fixed; inset: 0; z-index: 1000;
+/* ============================================================
+   LANDING PAGE — immersive dark intro
+   ============================================================ */
+#landing {
+  position: fixed; inset: 0; z-index: 100;
   display: flex; align-items: center; justify-content: center;
   background: var(--bg);
-  transition: opacity 0.6s ease, visibility 0.6s ease;
+  transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1), visibility 0.8s;
 }
-#intro-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+#landing.out { opacity: 0; visibility: hidden; pointer-events: none; }
 
-.intro-card {
-  background: var(--card-bg);
-  border-radius: 20px;
-  padding: 48px 40px;
-  max-width: 480px;
-  width: 90%;
-  text-align: center;
-  box-shadow: var(--shadow);
+/* animated background grain */
+#landing::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(215,51,39,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 30% 70%, rgba(241,188,54,0.06) 0%, transparent 60%);
+  animation: landingPulse 6s ease-in-out infinite alternate;
+}
+@keyframes landingPulse {
+  0% { opacity: 0.6; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.05); }
+}
+
+/* noise texture overlay */
+#landing::after {
+  content: ''; position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.landing-inner {
+  position: relative; z-index: 1;
+  text-align: center; padding: 40px 32px;
+  max-width: 520px; width: 100%;
+}
+
+/* Decorative top line */
+.landing-deco {
+  width: 60px; height: 2px; margin: 0 auto 32px;
+  background: linear-gradient(90deg, transparent, var(--red), var(--gold), transparent);
+  animation: decoGlow 3s ease-in-out infinite alternate;
+}
+@keyframes decoGlow {
+  0% { width: 40px; opacity: 0.5; }
+  100% { width: 80px; opacity: 1; }
+}
+
+.landing-title {
+  font-size: 3.2rem; font-weight: 900;
+  letter-spacing: 12px; margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--red) 0%, var(--gold) 50%, var(--sugar) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: titleReveal 1.2s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+@keyframes titleReveal {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); letter-spacing: 20px; }
+  to { opacity: 1; transform: translateY(0) scale(1); letter-spacing: 12px; }
+}
+
+.landing-sub {
+  font-size: 0.95rem; color: var(--fg-muted); letter-spacing: 2px;
+  margin-bottom: 36px;
+  animation: fadeUp 1s 0.3s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+.landing-desc {
+  font-size: 0.88rem; color: var(--fg-muted); line-height: 2;
+  margin-bottom: 40px; text-align: left;
+  padding: 20px 24px;
+  background: rgba(196,154,108,0.06);
+  border-left: 3px solid var(--red);
+  border-radius: 0 8px 8px 0;
+  animation: fadeUp 1s 0.5s cubic-bezier(0.16,1,0.3,1) both;
+}
+.landing-desc strong { color: var(--fg); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.landing-choices {
+  display: flex; gap: 16px; justify-content: center;
+  animation: fadeUp 1s 0.7s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+.choice-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 28px 32px;
+  background: rgba(196,154,108,0.08);
   border: 1px solid var(--border);
-  position: relative;
-  overflow: hidden;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  flex: 1; max-width: 200px;
+  font-family: inherit; color: var(--fg);
 }
-.intro-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
-  background: linear-gradient(90deg, var(--red), var(--gold), var(--sugar));
+.choice-btn:hover {
+  background: rgba(215,51,39,0.12);
+  border-color: rgba(215,51,39,0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(215,51,39,0.15);
 }
-.intro-title { font-size: 2rem; font-weight: 800; color: var(--red); margin-bottom: 8px; letter-spacing: 4px; }
-.intro-subtitle { font-size: 0.95rem; color: var(--fg-muted); margin-bottom: 28px; }
-.intro-info {
-  text-align: left; background: var(--bubble-bg); border-radius: 10px;
-  padding: 20px; margin-bottom: 28px; font-size: 0.9rem; color: var(--fg-muted); line-height: 1.9;
+.choice-btn:active { transform: translateY(-1px) scale(0.98); }
+
+.choice-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
 }
-.intro-info p { margin-bottom: 6px; }
-.intro-info strong { color: var(--fg); }
-.intro-buttons { display: flex; flex-direction: column; gap: 12px; }
+.choice-icon.camera { background: rgba(215,51,39,0.15); color: var(--red); }
+.choice-icon.button { background: rgba(241,188,54,0.15); color: var(--gold); }
 
-/* ========== Buttons ========== */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 14px 28px; border: none; border-radius: 10px;
-  font-size: 1rem; font-weight: 600; cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-  font-family: inherit;
-}
-.btn:active { transform: scale(0.97); }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.btn-primary { background: var(--red); color: #fff; box-shadow: 0 4px 12px rgba(215,51,39,0.3); }
-.btn-primary:hover:not(:disabled) { background: #c42e23; }
-.btn-secondary { background: var(--gold); color: var(--fg); box-shadow: 0 4px 12px rgba(241,188,54,0.3); }
-.btn-secondary:hover:not(:disabled) { background: #e0ad30; }
-.btn-outline { background: transparent; color: var(--fg); border: 2px solid var(--border); }
-.btn-outline:hover:not(:disabled) { border-color: var(--sugar); }
-.btn-small { padding: 10px 20px; font-size: 0.9rem; border-radius: 8px; }
+.choice-label { font-size: 1rem; font-weight: 700; letter-spacing: 1px; }
+.choice-hint { font-size: 0.75rem; color: var(--fg-muted); }
 
-/* ========== App ========== */
-#app { display: none; min-height: 100vh; }
-#app.active { display: flex; flex-direction: column; }
-
-.app-header { text-align: center; padding: 16px 20px 8px; }
-.app-header h1 { font-size: 1.3rem; font-weight: 800; color: var(--red); letter-spacing: 3px; }
-
-.main-stage {
-  flex: 1; display: flex; gap: 24px;
-  padding: 12px 32px 32px; max-width: 1200px; margin: 0 auto; width: 100%;
+.landing-footer {
+  margin-top: 48px; font-size: 0.7rem; color: rgba(160,138,114,0.5);
+  letter-spacing: 1px;
+  animation: fadeUp 1s 0.9s cubic-bezier(0.16,1,0.3,1) both;
 }
 
-/* ========== Left: 3D ========== */
-.stage-left { flex: 1; display: flex; flex-direction: column; position: relative; }
+/* ============================================================
+   IMMERSIVE STAGE — full-screen, all UI overlaid
+   ============================================================ */
+#stage-page {
+  position: fixed; inset: 0;
+  display: none;
+}
+#stage-page.active { display: block; }
+
+/* Full-screen 3D container */
 #beast-stage {
-  width: 100%; flex: 1;
-  min-height: 500px;
-  background: radial-gradient(ellipse at center, #FFF8F0 0%, #F0E6D8 100%);
-  border-radius: 16px; border: 1px solid var(--border);
-  box-shadow: inset 0 2px 12px rgba(44,24,16,0.05);
-  position: relative; overflow: hidden;
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 45%, #2a1a10 0%, #0d0604 100%);
 }
-#beast-stage canvas { display: block; width: 100% !important; height: 100% !important; position: relative; z-index: 2; }
+#beast-stage canvas {
+  display: block; width: 100% !important; height: 100% !important;
+  position: relative; z-index: 2;
+}
 
 /* Camera background */
 #camera-bg {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
-  object-fit: cover;
-  z-index: 0;
+  object-fit: cover; z-index: 0;
   transform: scaleX(-1);
-  opacity: 0;
-  transition: opacity 0.6s ease;
+  opacity: 0; transition: opacity 0.6s ease;
   pointer-events: none;
 }
 #camera-bg.active { opacity: 1; }
 #camera-bg-overlay {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at center, rgba(246,239,230,0.55) 0%, rgba(44,24,16,0.35) 100%);
-  z-index: 1;
-  opacity: 0;
-  transition: opacity 0.6s ease;
+  background: radial-gradient(ellipse at center, rgba(26,14,8,0.5) 0%, rgba(13,6,4,0.7) 100%);
+  z-index: 1; opacity: 0; transition: opacity 0.6s ease;
   pointer-events: none;
 }
 #camera-bg-overlay.active { opacity: 1; }
 
-/* Video element for MediaPipe — hidden but functional */
+/* Hidden video for MediaPipe */
 #video-preview {
-  position: absolute;
-  width: 1px; height: 1px;
-  opacity: 0; pointer-events: none;
-  z-index: -1;
+  position: absolute; width: 1px; height: 1px;
+  opacity: 0; pointer-events: none; z-index: -1;
 }
 
-/* Loading & Error */
+/* ---- Overlaid UI elements ---- */
+
+/* Top-left: title */
+#stage-title {
+  position: absolute; top: 24px; left: 28px; z-index: 20;
+  font-size: 1.1rem; font-weight: 800; letter-spacing: 4px;
+  color: var(--fg); opacity: 0.7;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  transition: opacity 0.4s;
+}
+
+/* Top-right: minimal progress dots */
+#stage-progress {
+  position: absolute; top: 28px; right: 28px; z-index: 20;
+  display: flex; gap: 8px; align-items: center;
+}
+.prog-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(196,154,108,0.25);
+  border: 1.5px solid rgba(196,154,108,0.3);
+  transition: all 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.prog-dot.completed {
+  background: var(--gold); border-color: var(--gold);
+  box-shadow: 0 0 8px rgba(241,188,54,0.4);
+}
+.prog-dot.active {
+  background: var(--red); border-color: var(--red);
+  box-shadow: 0 0 12px rgba(215,51,39,0.5);
+  transform: scale(1.3);
+}
+.prog-name {
+  font-size: 0; width: 0; overflow: hidden;
+  transition: all 0.3s;
+}
+.prog-dot.active + .prog-name,
+.prog-dot.completed + .prog-name {
+  /* names hidden for minimal look */
+}
+
+/* Center: step info overlay (fades in/out on step change) */
+#step-overlay {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 30;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+#step-overlay.visible { opacity: 1; }
+
+#step-overlay .step-title {
+  font-size: 2rem; font-weight: 800; letter-spacing: 6px;
+  color: var(--fg);
+  text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  margin-bottom: 12px;
+}
+#step-overlay .step-desc {
+  font-size: 0.95rem; color: var(--fg-muted);
+  max-width: 400px; margin: 0 auto;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+/* Bottom-center: gesture prompt */
+#gesture-prompt {
+  position: absolute;
+  bottom: 80px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  text-align: center;
+  pointer-events: none;
+}
+
+.gesture-hint-text {
+  font-size: 1rem; font-weight: 600;
+  color: var(--gold); letter-spacing: 2px;
+  text-shadow: 0 2px 12px rgba(241,188,54,0.4);
+  animation: hintPulse 2.5s ease-in-out infinite;
+}
+@keyframes hintPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.gesture-status-text {
+  font-size: 0.8rem; color: var(--fg-muted);
+  margin-top: 6px;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+}
+
+/* Bottom-left: knowledge bubble (非遗小识) */
+#knowledge-float {
+  position: absolute;
+  bottom: 140px; left: 28px; right: 28px;
+  z-index: 20;
+  max-width: 360px;
+  padding: 16px 20px;
+  background: var(--card-bg);
+  border-left: 3px solid var(--sugar);
+  border-radius: 0 10px 10px 0;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all 0.5s cubic-bezier(0.4,0,0.2,1);
+  pointer-events: none;
+}
+#knowledge-float.visible {
+  opacity: 1; transform: translateY(0);
+}
+
+.knowledge-tag {
+  font-size: 0.65rem; font-weight: 700; color: var(--sugar);
+  letter-spacing: 2px; margin-bottom: 4px; text-transform: uppercase;
+}
+#knowledge-text {
+  font-size: 0.82rem; color: var(--fg-muted); line-height: 1.7;
+}
+
+/* Bottom-right: control buttons (minimal) */
+#stage-controls {
+  position: absolute; bottom: 24px; right: 28px; z-index: 20;
+  display: flex; gap: 10px; align-items: center;
+}
+
+.ctrl-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(196,154,108,0.1);
+  border: 1px solid var(--border);
+  color: var(--fg-muted);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; cursor: pointer;
+  transition: all 0.25s;
+  font-family: inherit;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.ctrl-btn:hover { background: rgba(196,154,108,0.2); color: var(--fg); border-color: rgba(196,154,108,0.4); }
+.ctrl-btn:active { transform: scale(0.92); }
+.ctrl-btn.primary {
+  background: rgba(215,51,39,0.2); border-color: rgba(215,51,39,0.4);
+  color: var(--red); font-weight: 700;
+}
+.ctrl-btn.primary:hover { background: rgba(215,51,39,0.3); }
+.ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+/* "继续造物" prominent button */
+#btn-next {
+  width: auto; border-radius: 22px; padding: 0 24px;
+  font-size: 0.85rem; font-weight: 700; letter-spacing: 1px;
+}
+
+/* Bottom-left: camera button */
+#camera-controls {
+  position: absolute; bottom: 24px; left: 28px; z-index: 20;
+  display: flex; gap: 10px;
+}
+
+/* Loading & Error overlays */
 #loading-indicator {
-  position: absolute; inset: 0; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; background: rgba(246,239,230,0.85);
-  z-index: 10;
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: rgba(13,6,4,0.9); z-index: 50;
 }
 .spinner {
-  width: 40px; height: 40px; border: 4px solid var(--border);
-  border-top-color: var(--red); border-radius: 50%;
+  width: 48px; height: 48px;
+  border: 3px solid rgba(196,154,108,0.15);
+  border-top-color: var(--red);
+  border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { color: var(--fg-muted); font-size: 0.9rem; }
+.loading-text { color: var(--fg-muted); font-size: 0.9rem; letter-spacing: 1px; }
 
 #model-error {
-  position: absolute; inset: 0; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; background: rgba(246,239,230,0.9);
-  z-index: 10; padding: 40px; text-align: center;
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: rgba(13,6,4,0.92); z-index: 50;
+  padding: 40px; text-align: center;
 }
-#model-error .error-icon { font-size: 3rem; margin-bottom: 12px; }
+#model-error .error-icon { font-size: 3rem; margin-bottom: 16px; }
 #model-error .error-title { font-size: 1.1rem; font-weight: 700; color: var(--red); margin-bottom: 8px; }
 #model-error .error-detail { font-size: 0.85rem; color: var(--fg-muted); }
 
-/* ========== Right Panel ========== */
-.stage-right {
-  width: 340px; flex-shrink: 0;
-  display: flex; flex-direction: column; gap: 14px;
+/* ---- Complete overlay (fortune reveal) ---- */
+#complete-overlay {
+  position: absolute; inset: 0; z-index: 40;
+  display: none;
+  flex-direction: column; align-items: center; justify-content: center;
+  background: rgba(13,6,4,0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: completeFadeIn 0.8s ease forwards;
+}
+#complete-overlay.visible { display: flex; }
+@keyframes completeFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Progress */
-.progress-card {
-  background: var(--card-bg); border-radius: var(--radius);
-  padding: 16px 20px; border: 1px solid var(--border);
-}
-.progress-stages {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  position: relative;
-}
-.progress-stages::before {
-  content: ''; position: absolute; top: 16px; left: 28px; right: 28px;
-  height: 3px; background: var(--border); z-index: 0;
-}
-.progress-stage {
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  z-index: 1; position: relative; flex: 1;
-}
-.stage-dot {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: var(--card-bg); border: 3px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.7rem; font-weight: 700; color: var(--fg-muted);
-  transition: all 0.4s ease;
-}
-.stage-dot.completed { border-color: var(--gold); background: var(--gold); color: #fff; }
-.stage-dot.active {
-  border-color: var(--red); background: var(--red); color: #fff;
-  box-shadow: 0 0 0 4px rgba(215,51,39,0.15);
-}
-.stage-name { font-size: 0.7rem; color: var(--fg-muted); text-align: center; white-space: nowrap; }
-.stage-name.completed { color: var(--gold); font-weight: 600; }
-.stage-name.active { color: var(--red); font-weight: 600; }
-
-/* Step info */
-.step-card {
-  background: var(--card-bg); border-radius: var(--radius);
-  padding: 20px; border: 1px solid var(--border);
-}
-#step-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
-#step-desc { font-size: 0.9rem; color: var(--fg-muted); }
-
-/* Knowledge bubble */
-.knowledge-card {
-  background: var(--bubble-bg); border-radius: 10px;
-  padding: 14px 16px; border-left: 4px solid var(--sugar);
-  animation: bubbleIn 0.5s ease forwards;
-}
-@keyframes bubbleIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.knowledge-tag {
-  display: inline-block; font-size: 0.7rem; font-weight: 700;
-  color: var(--sugar); letter-spacing: 1px; margin-bottom: 4px;
-}
-#knowledge-text { font-size: 0.85rem; color: var(--fg-muted); line-height: 1.7; }
-
-/* Actions */
-.actions-card {
-  background: var(--card-bg); border-radius: var(--radius);
-  padding: 16px 20px; border: 1px solid var(--border);
-  display: flex; flex-direction: column; gap: 10px;
-}
-#stage-hint { font-size: 0.8rem; color: var(--fg-muted); }
-#gesture-hint {
-  font-size: 0.8rem; color: var(--sugar);
-  background: var(--bubble-bg); border-radius: 6px;
-  padding: 6px 10px; border-left: 3px solid var(--sugar);
-}
-#gesture-status {
-  font-size: 0.75rem; color: var(--fg-muted);
-  min-height: 1.2em;
-}
-.actions-row { display: flex; gap: 8px; }
-.actions-row .btn { flex: 1; }
-
-/* ========== Complete Section ========== */
-#complete-section {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-  background: linear-gradient(0deg, var(--card-bg) 0%, rgba(255,248,240,0.95) 100%);
-  border-top: 1px solid var(--border);
-  padding: 20px 32px; backdrop-filter: blur(8px);
-}
-.complete-inner {
-  max-width: 1200px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between; gap: 24px;
-}
-#fortune-display { display: flex; align-items: center; gap: 16px; }
 #fortune-label {
-  font-size: 2.5rem; font-weight: 800; width: 64px; height: 64px;
+  width: 100px; height: 100px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 50%; color: #fff;
+  font-size: 3rem; font-weight: 900; color: #fff;
+  margin-bottom: 16px;
+  box-shadow: 0 0 40px rgba(215,51,39,0.3);
 }
-.complete-info { display: flex; flex-direction: column; }
-#fortune-name { font-size: 1.1rem; font-weight: 700; }
-#fortune-blessing { font-size: 0.9rem; color: var(--fg-muted); }
-.complete-actions { display: flex; gap: 10px; }
-
-/* ========== Footer ========== */
-.app-footer {
-  text-align: center; padding: 20px; font-size: 0.8rem;
-  color: var(--fg-muted); border-top: 1px solid var(--border);
-  margin-top: auto;
+#fortune-name {
+  font-size: 1.5rem; font-weight: 800; letter-spacing: 4px;
+  margin-bottom: 8px;
 }
-.app-footer a { color: var(--sugar); text-decoration: none; }
+#fortune-blessing {
+  font-size: 0.95rem; color: var(--fg-muted);
+  margin-bottom: 32px; max-width: 320px; text-align: center;
+}
 
-/* ========== Responsive ========== */
+.complete-actions { display: flex; gap: 12px; }
+.complete-btn {
+  padding: 12px 28px; border-radius: 24px;
+  font-size: 0.9rem; font-weight: 700; cursor: pointer;
+  font-family: inherit; letter-spacing: 1px;
+  transition: all 0.25s; border: none;
+}
+.complete-btn:active { transform: scale(0.95); }
+.complete-btn.primary {
+  background: var(--red); color: #fff;
+  box-shadow: 0 4px 20px rgba(215,51,39,0.3);
+}
+.complete-btn.secondary {
+  background: rgba(241,188,54,0.15); color: var(--gold);
+  border: 1px solid rgba(241,188,54,0.3);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 @media (max-width: 900px) {
-  .main-stage { flex-direction: column; padding: 12px 16px 16px; }
-  .stage-right { width: 100%; }
-  #beast-stage { min-height: 360px; }
-  .complete-inner { flex-direction: column; text-align: center; }
-  #fortune-display { justify-content: center; }
+  .landing-title { font-size: 2.4rem; letter-spacing: 8px; }
+  .landing-choices { flex-direction: column; align-items: center; }
+  .choice-btn { max-width: 280px; }
+  #step-overlay .step-title { font-size: 1.5rem; letter-spacing: 4px; }
+  #knowledge-float { max-width: 280px; bottom: 160px; }
+  #gesture-prompt { bottom: 100px; }
+}
+
+@media (max-width: 380px) {
+  .landing-title { font-size: 1.8rem; letter-spacing: 6px; }
+  .landing-inner { padding: 24px 20px; }
+  .choice-btn { padding: 20px 24px; }
+}
+
+/* Safe area */
+@supports (padding: env(safe-area-inset-bottom)) {
+  #stage-controls, #camera-controls {
+    bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+  #gesture-prompt {
+    bottom: calc(80px + env(safe-area-inset-bottom));
+  }
 }
 </style>
 </head>
 <body>
 
-<!-- ===== Intro ===== -->
-<div id="intro-overlay">
-  <div class="intro-card">
-    <div class="intro-title">吹糖造物</div>
-    <div class="intro-subtitle">灵感来自国家级非遗 · 天门糖塑</div>
-    <div class="intro-info">
+<!-- ============================================================
+     LANDING PAGE
+     ============================================================ -->
+<div id="landing">
+  <div class="landing-inner">
+    <div class="landing-deco"></div>
+    <div class="landing-title">吹糖造物</div>
+    <div class="landing-sub">灵感来自国家级非遗 · 天门糖塑</div>
+    <div class="landing-desc">
       <p><strong>体验流程</strong>：六个阶段 · 约两分钟</p>
       <p><strong>基础动作</strong>：张开手掌 · 握紧拳头 · 两指开合</p>
       <p>本体验基于吹、捏、拉、贴等糖塑造型语言进行数字化互动表达。</p>
     </div>
-    <div class="intro-buttons">
-      <button class="btn btn-primary" id="btn-enter">开始体验</button>
+    <div class="landing-choices">
+      <button class="choice-btn" id="btn-mode-camera">
+        <div class="choice-icon camera">📷</div>
+        <div class="choice-label">摄像头交互</div>
+        <div class="choice-hint">手势驱动 · 沉浸体验</div>
+      </button>
+      <button class="choice-btn" id="btn-mode-button">
+        <div class="choice-icon button">👆</div>
+        <div class="choice-label">按钮交互</div>
+        <div class="choice-hint">点击推进 · 轻松体验</div>
+      </button>
     </div>
+    <div class="landing-footer">天门糖塑 · 国家级非物质文化遗产</div>
   </div>
 </div>
 
-<!-- ===== App ===== -->
-<div id="app">
-  <header class="app-header">
-    <h1>吹糖造物</h1>
-  </header>
-
-  <div class="main-stage">
-    <!-- Left: 3D -->
-    <div class="stage-left">
-      <div id="beast-stage">
-        <video id="camera-bg" autoplay playsinline muted></video>
-        <div id="camera-bg-overlay"></div>
-        <div id="loading-indicator">
-          <div class="spinner"></div>
-          <div class="loading-text">正在加载糖塑瑞兽模型…</div>
-        </div>
-        <div id="model-error" class="hidden">
-          <div class="error-icon">⚠️</div>
-          <div class="error-title">模型加载失败</div>
-          <div class="error-detail" id="error-message"></div>
-        </div>
-        <video id="video-preview" autoplay playsinline muted></video>
-      </div>
+<!-- ============================================================
+     IMMERSIVE STAGE
+     ============================================================ -->
+<div id="stage-page">
+  <div id="beast-stage">
+    <video id="camera-bg" autoplay playsinline muted></video>
+    <div id="camera-bg-overlay"></div>
+    <div id="loading-indicator">
+      <div class="spinner"></div>
+      <div class="loading-text">正在加载糖塑瑞兽模型…</div>
     </div>
-
-    <!-- Right: Info -->
-    <div class="stage-right">
-      <!-- Progress -->
-      <div class="progress-card">
-        <div class="progress-stages">
-          <div class="progress-stage">
-            <div class="stage-dot">1</div>
-            <div class="stage-name">底座</div>
-          </div>
-          <div class="progress-stage">
-            <div class="stage-dot">2</div>
-            <div class="stage-name">身体</div>
-          </div>
-          <div class="progress-stage">
-            <div class="stage-dot">3</div>
-            <div class="stage-name">四肢</div>
-          </div>
-          <div class="progress-stage">
-            <div class="stage-dot">4</div>
-            <div class="stage-name">头部</div>
-          </div>
-          <div class="progress-stage">
-            <div class="stage-dot">5</div>
-            <div class="stage-name">装饰</div>
-          </div>
-          <div class="progress-stage">
-            <div class="stage-dot">6</div>
-            <div class="stage-name">赐福</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step Info -->
-      <div class="step-card">
-        <div id="step-title">准备开始</div>
-        <div id="step-desc">点击"开始体验"按钮，进入糖塑造物之旅。</div>
-      </div>
-
-      <!-- Knowledge Bubble -->
-      <div class="knowledge-card" id="knowledge-bubble">
-        <div class="knowledge-tag">🧧 非遗小识</div>
-        <div id="knowledge-text"></div>
-      </div>
-
-      <!-- Actions -->
-      <div class="actions-card">
-        <div id="stage-hint"></div>
-        <div id="gesture-hint"></div>
-        <div id="gesture-status"></div>
-        <div class="actions-row">
-          <button class="btn btn-primary" id="btn-next">继续造物</button>
-          <button class="btn btn-outline btn-small" id="btn-screen" title="全屏">⛶</button>
-        </div>
-        <div class="actions-row">
-          <button class="btn btn-outline btn-small" id="btn-camera">开启摄像头</button>
-          <button class="btn btn-outline btn-small" id="btn-reset">重新开始</button>
-        </div>
-      </div>
+    <div id="model-error" class="hidden">
+      <div class="error-icon">⚠️</div>
+      <div class="error-title">模型加载失败</div>
+      <div class="error-detail" id="error-message"></div>
     </div>
+    <video id="video-preview" autoplay playsinline muted></video>
   </div>
 
-  <!-- ===== Complete Section ===== -->
-  <div id="complete-section" class="hidden">
-    <div class="complete-inner">
-      <div id="fortune-display" class="hidden">
-        <div id="fortune-label">顺</div>
-        <div class="complete-info">
-          <div id="fortune-name">顺遂</div>
-          <div id="fortune-blessing">愿你一路顺遂，所行皆有回响。</div>
-        </div>
-      </div>
-      <div class="complete-actions">
-        <button class="btn btn-primary btn-small" id="btn-reset-bottom">再造一只</button>
-        <button class="btn btn-secondary btn-small" id="btn-share">保存分享卡</button>
-      </div>
-    </div>
+  <!-- Title -->
+  <div id="stage-title">吹糖造物</div>
+
+  <!-- Progress dots -->
+  <div id="stage-progress">
+    <div class="prog-dot" data-phase="0"></div>
+    <div class="prog-dot" data-phase="1"></div>
+    <div class="prog-dot" data-phase="2"></div>
+    <div class="prog-dot" data-phase="3"></div>
+    <div class="prog-dot" data-phase="4"></div>
+    <div class="prog-dot" data-phase="5"></div>
   </div>
 
-  <footer class="app-footer">
-    灵感来自<a href="#">国家级非物质文化遗产 · 天门糖塑</a>。本体验基于吹、捏、拉、贴等糖塑造型语言进行数字化互动表达。
-  </footer>
+  <!-- Step overlay (center, fades in/out) -->
+  <div id="step-overlay">
+    <div class="step-title" id="step-title"></div>
+    <div class="step-desc" id="step-desc"></div>
+  </div>
+
+  <!-- Gesture prompt (bottom center) -->
+  <div id="gesture-prompt">
+    <div class="gesture-hint-text" id="gesture-hint"></div>
+    <div class="gesture-status-text" id="gesture-status"></div>
+  </div>
+
+  <!-- Knowledge bubble (bottom left) -->
+  <div id="knowledge-float">
+    <div class="knowledge-tag">非遗小识</div>
+    <div id="knowledge-text"></div>
+  </div>
+
+  <!-- Controls (bottom right) -->
+  <div id="stage-controls">
+    <button class="ctrl-btn primary" id="btn-next" title="继续造物">继续</button>
+    <button class="ctrl-btn" id="btn-screen" title="全屏">⛶</button>
+    <button class="ctrl-btn" id="btn-reset" title="重新开始">↺</button>
+  </div>
+
+  <!-- Camera controls (bottom left) -->
+  <div id="camera-controls">
+    <button class="ctrl-btn" id="btn-camera" title="开启摄像头">📷</button>
+  </div>
+
+  <!-- Complete overlay -->
+  <div id="complete-overlay">
+    <div id="fortune-label">顺</div>
+    <div id="fortune-name">顺遂</div>
+    <div id="fortune-blessing">愿你一路顺遂，所行皆有回响。</div>
+    <div class="complete-actions">
+      <button class="complete-btn primary" id="btn-reset-bottom">再造一只</button>
+      <button class="complete-btn secondary" id="btn-share">保存分享卡</button>
+    </div>
+  </div>
 </div>
 
 <script type="module" src="/src/main.js?v=20260713"></script>
