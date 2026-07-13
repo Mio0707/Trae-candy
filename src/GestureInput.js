@@ -24,9 +24,9 @@ const GESTURE_THRESHOLDS = {
   liftMinX: 0.28,
   liftMaxX: 0.72,
   liftMoveY: 0.09,
-  liftHoldMs: 550,
-  liftFrameJitter: 0.025,
-  liftMaxDriftX: 0.14,
+  liftHoldMs: 350,
+  liftFrameJitter: 0.05,
+  liftMaxDriftX: 0.2,
   twoHandMinSeparation: 0.05,
   twoHandMotionDelta: 0.12,
   twoHandMinDurationMs: 240,
@@ -349,11 +349,10 @@ export class GestureInput {
       case 'lift-ready':
         return {
           ready:
-            pose === 'open' &&
+            ['open', 'hand'].includes(pose) &&
             hand.normalizedX >= GESTURE_THRESHOLDS.liftMinX &&
-            hand.normalizedX <= GESTURE_THRESHOLDS.liftMaxX &&
-            hand.normalizedY < GESTURE_THRESHOLDS.liftMinY - 0.04,
-          hint: '请先在画面中间、瑞兽上方张开手掌',
+            hand.normalizedX <= GESTURE_THRESHOLDS.liftMaxX,
+          hint: '请在画面中间张开手掌',
         };
       default:
         return { ready: true, hint: '' };
@@ -371,7 +370,8 @@ export class GestureInput {
     }
 
     const tracking = this.liftTracking;
-    if (pose !== 'open') {
+    // 接受张开手掌或普通手掌姿势（让手机端更容易触发）
+    if (!['open', 'hand'].includes(pose)) {
       tracking.last = null;
       tracking.holdStartedAt = null;
       tracking.holdMs = 0;
@@ -381,8 +381,17 @@ export class GestureInput {
     }
 
     const point = { x: hand.normalizedX, y: hand.normalizedY };
-    const readyY = GESTURE_THRESHOLDS.liftMinY - 0.04;
-    if (!tracking.start || point.y < readyY) {
+    const inHorizontalZone =
+      point.x >= GESTURE_THRESHOLDS.liftMinX &&
+      point.x <= GESTURE_THRESHOLDS.liftMaxX;
+
+    // 允许从画面上方开始追踪，或直接到达下方停留
+    const fromAbove = tracking.start && tracking.start.y < GESTURE_THRESHOLDS.liftMinY;
+    const atBottom = point.y >= GESTURE_THRESHOLDS.liftMinY;
+    const deltaY = tracking.start ? point.y - tracking.start.y : 0;
+
+    if (!tracking.start || (!fromAbove && !atBottom)) {
+      // 重新锚定起点
       tracking.start = point;
       tracking.last = point;
       tracking.holdStartedAt = null;
@@ -392,17 +401,8 @@ export class GestureInput {
       return tracking;
     }
 
-    const deltaY = point.y - tracking.start.y;
-    const driftX = Math.abs(point.x - tracking.start.x);
-    const inHorizontalZone =
-      point.x >= GESTURE_THRESHOLDS.liftMinX &&
-      point.x <= GESTURE_THRESHOLDS.liftMaxX &&
-      driftX <= GESTURE_THRESHOLDS.liftMaxDriftX;
     const moveProgress = Math.min(1, Math.max(0, deltaY / GESTURE_THRESHOLDS.liftMoveY));
-    const reachedTarget =
-      inHorizontalZone &&
-      point.y >= GESTURE_THRESHOLDS.liftMinY &&
-      deltaY >= GESTURE_THRESHOLDS.liftMoveY;
+    const reachedTarget = inHorizontalZone && atBottom;
 
     if (!reachedTarget) {
       tracking.holdStartedAt = null;
