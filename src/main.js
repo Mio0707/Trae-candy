@@ -286,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
     currentFortune = fortune;
 
     if (step.knowledge) {
-      if (stepTitle) stepTitle.textContent = '非遗小识';
+      if (stepTitle) stepTitle.textContent = '';
       if (stepDesc) stepDesc.textContent = step.knowledge;
       if (stepOverlay) {
         stepOverlay.classList.add('visible');
@@ -301,12 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    if (step.knowledge) {
-      knowledgeText.textContent = step.knowledge;
-      knowledgeFloat.classList.add('visible');
-    } else {
-      knowledgeFloat.classList.remove('visible');
-    }
+    knowledgeFloat.classList.remove('visible');
 
     if (cameraActive) {
       updateGestureHint();
