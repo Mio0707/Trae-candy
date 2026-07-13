@@ -109,7 +109,29 @@ body {
   box-shadow: inset 0 2px 12px rgba(44,24,16,0.05);
   position: relative; overflow: hidden;
 }
-#beast-stage canvas { display: block; width: 100% !important; height: 100% !important; }
+#beast-stage canvas { display: block; width: 100% !important; height: 100% !important; position: relative; z-index: 2; }
+
+/* Camera background */
+#camera-bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  transform: scaleX(-1);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+#camera-bg.active { opacity: 1; }
+#camera-bg-overlay {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, rgba(246,239,230,0.55) 0%, rgba(44,24,16,0.35) 100%);
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+#camera-bg-overlay.active { opacity: 1; }
 
 /* Video preview overlay */
 #video-preview {
@@ -296,6 +318,8 @@ body {
     <!-- Left: 3D -->
     <div class="stage-left">
       <div id="beast-stage">
+        <video id="camera-bg" autoplay playsinline muted></video>
+        <div id="camera-bg-overlay"></div>
         <div id="loading-indicator">
           <div class="spinner"></div>
           <div class="loading-text">正在加载糖塑瑞兽模型…</div>

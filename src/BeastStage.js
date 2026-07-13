@@ -840,6 +840,7 @@ export class BeastStage extends EventTarget {
 
   setBlessingHandTarget(normalizedX, normalizedY) {
     const step = EXPERIENCE_STEPS[this.stepIndex];
+    // 粒子跟随手只在 fortune-shell 步骤生效
     if (step?.id !== 'fortune-shell' || !this.blessingParticles || this.absorbAnimation) return;
 
     const elapsed = this.clock.getElapsedTime();

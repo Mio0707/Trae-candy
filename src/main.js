@@ -112,19 +112,31 @@ function initGestureInput() {
     wasmBaseUrl: '/runtime/mediapipe-wasm/',
     modelUrl: '/runtime/hand_landmarker.task',
     onAction: (action) => {
-      if (!stage || !currentStep) return;
+      if (!stage || !currentStep) return false;
       const stepConfig = getStep(currentStep.id);
-      if (!stepConfig || !stepConfig.gesture) return;
+      if (!stepConfig || !stepConfig.gesture) return false;
 
-      const matched = matchesStepGesture(stepConfig, action.actionType);
+      const matched = matchesStepGesture(stepConfig, action.type);
       if (matched) {
-        console.log('[Gesture] 匹配手势:', action.actionType, '→ 步骤:', currentStep.id);
+        console.log('[Gesture] 匹配手势:', action.type, '→ 步骤:', currentStep.id);
         stage.next();
+        return true;
       }
+      return false;
     },
     onStatus: (status) => {
       if (gestureStatus) {
         gestureStatus.textContent = status.message || '';
+      }
+      // 粒子跟随手部位置 — 只要有手就设置目标
+      if (stage && status.hand) {
+        stage.setBlessingHandTarget(status.hand.normalizedX, status.hand.normalizedY);
+      } else if (stage) {
+        stage.clearBlessingHandTarget();
+      }
+      // 托起手势预览进度
+      if (stage && status.liftState) {
+        stage.setGesturePreview(status.liftState.progress || 0);
       }
     },
   });
@@ -137,6 +149,9 @@ function initGestureInput() {
 
 async function toggleCamera() {
   if (!gestureInput) return;
+  const cameraBg = document.getElementById('camera-bg');
+  const cameraBgOverlay = document.getElementById('camera-bg-overlay');
+
   if (cameraActive) {
     gestureInput.stop();
     cameraActive = false;
@@ -144,16 +159,30 @@ async function toggleCamera() {
     if (videoPreview) videoPreview.classList.add('hidden');
     if (gestureStatus) gestureStatus.textContent = '';
     if (gestureHint) gestureHint.textContent = '';
+    // 隐藏摄像头背景
+    if (cameraBg) { cameraBg.classList.remove('active'); cameraBg.srcObject = null; }
+    if (cameraBgOverlay) cameraBgOverlay.classList.remove('active');
   } else {
     try {
+      if (videoPreview) videoPreview.classList.remove('hidden');
       await gestureInput.init();
       cameraActive = true;
       if (btnCamera) btnCamera.textContent = '关闭摄像头';
-      if (videoPreview) videoPreview.classList.remove('hidden');
       updateGestureHint();
+      // 通知手势系统当前步骤
+      if (currentStep) updateGestureStep(currentStep);
+      // 将摄像头流绑定到背景视频
+      if (cameraBg && videoPreview.srcObject) {
+        cameraBg.srcObject = videoPreview.srcObject;
+        cameraBg.play().catch(() => {});
+        cameraBg.classList.add('active');
+        if (cameraBgOverlay) cameraBgOverlay.classList.add('active');
+      }
     } catch (err) {
       console.error('[Gesture] 摄像头启动失败:', err);
-      alert('摄像头启动失败，请确保已授予摄像头权限。');
+      if (videoPreview) videoPreview.classList.add('hidden');
+      const message = err?.message || '摄像头启动失败，请确保已授予摄像头权限。';
+      if (gestureStatus) gestureStatus.textContent = message;
     }
   }
 }
@@ -170,6 +199,20 @@ function updateGestureHint() {
 
 function onStepChange(e) {
   updateUI(e.detail);
+  updateGestureStep(e.detail.step);
+}
+
+function updateGestureStep(step) {
+  if (!gestureInput || !step) return;
+  const stepConfig = getStep(step.id);
+  if (!stepConfig || !stepConfig.gesture) {
+    gestureInput.beginStep({ actions: [], resetMode: null });
+    return;
+  }
+  gestureInput.beginStep({
+    actions: stepConfig.gesture.actions || [],
+    resetMode: stepConfig.gesture.resetMode || null,
+  });
 }
 
 function updateUI(state) {

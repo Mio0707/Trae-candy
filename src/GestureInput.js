@@ -7,7 +7,8 @@ const HOLD_MS = 900;
 const HISTORY_MS = 900;
 const TWO_HAND_HISTORY_MS = 700;
 const RESET_STABLE_MS = 280;
-const DEFAULT_WASM_BASE_URL = '/six-stage-sugar-experience/runtime/mediapipe-wasm';
+const DEFAULT_WASM_BASE_URL = '/runtime/mediapipe-wasm';
+
 const GESTURE_THRESHOLDS = {
   pinchDistance: 0.065,
   openFingertipDistance: 0.22,
@@ -30,11 +31,22 @@ const GESTURE_THRESHOLDS = {
   twoHandMinSeparation: 0.05,
   twoHandMotionDelta: 0.12,
   twoHandMinDurationMs: 240,
-  thumbIndexSpreadRatio: 1,
-  thumbIndexResetRatio: 0.62,
-  thumbIndexCloseRatio: 0.35,
-  thumbIndexCloseDistance: 0.075,
-  thumbIndexStableMs: 240,
+  thumbIndexSpreadRatio: 0.7,
+  thumbIndexResetRatio: 0.55,
+  thumbIndexCloseRatio: 0.4,
+  thumbIndexCloseDistance: 0.085,
+  thumbIndexStableMs: 180,
+};
+
+const STATUS_MESSAGES = {
+  loading: '正在加载手势识别引擎...',
+  'waiting-camera': '等待摄像头画面...',
+  searching: '正在寻找手部，请将手伸入画面',
+  tracking: '已识别到手部',
+  'waiting-reset': '请调整手势',
+  accepted: '手势已识别！',
+  error: '手势识别出错',
+  paused: '手势识别已暂停',
 };
 
 const LANDMARK = {
@@ -81,10 +93,55 @@ export class GestureInput {
     this.gateBypassed = false;
   }
 
+  async init() {
+    await this.startCamera();
+    await this.start();
+  }
+
+  async startCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('当前浏览器不支持摄像头访问，请使用 Safari 或 Chrome 浏览器打开');
+    }
+    let stream = null;
+    let lastError = null;
+    const constraintsList = [
+      { video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false },
+      { video: { facingMode: 'user' }, audio: false },
+      { video: true, audio: false },
+    ];
+    for (const constraints of constraintsList) {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        break;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+    if (!stream) {
+      const msg = lastError?.name === 'NotAllowedError'
+        ? '摄像头权限被拒绝，请在浏览器设置中允许摄像头访问'
+        : lastError?.name === 'NotFoundError'
+          ? '未找到摄像头设备'
+          : lastError?.message || '摄像头启动失败';
+      throw new Error(msg);
+    }
+    this.videoElement.srcObject = stream;
+    this.videoElement.setAttribute('playsinline', 'true');
+    this.videoElement.setAttribute('webkit-playsinline', 'true');
+    this.videoElement.setAttribute('muted', 'true');
+    this.videoElement.muted = true;
+    try {
+      await this.videoElement.play();
+    } catch {
+      await new Promise((r) => setTimeout(r, 300));
+      try { await this.videoElement.play(); } catch { /* ignore */ }
+    }
+  }
+
   async start() {
     if (this.active) return;
     this.active = true;
-    this.emitStatus({ state: 'loading', action: null, engine: 'MediaPipe Hands' });
+    this.emitStatus({ state: 'loading', action: null, engine: 'MediaPipe Hands', message: STATUS_MESSAGES.loading });
 
     try {
       await this.initialize();
@@ -97,6 +154,7 @@ export class GestureInput {
         action: null,
         engine: 'MediaPipe Hands',
         error: error?.message ?? String(error),
+        message: error?.message ?? STATUS_MESSAGES.error,
       });
     }
   }
@@ -107,6 +165,13 @@ export class GestureInput {
       cancelAnimationFrame(this.animationFrame);
       this.animationFrame = null;
     }
+    // 停止摄像头
+    if (this.videoElement.srcObject) {
+      for (const track of this.videoElement.srcObject.getTracks()) {
+        track.stop();
+      }
+      this.videoElement.srcObject = null;
+    }
 
     this.previousPose = 'none';
     this.history = [];
@@ -115,7 +180,7 @@ export class GestureInput {
     this.closeStartedAt = null;
     this.fistStartedAt = null;
     this.liftTracking = this.createLiftTracking();
-    this.emitStatus({ state: 'paused', action: null, engine: 'MediaPipe Hands' });
+    this.emitStatus({ state: 'paused', action: null, engine: 'MediaPipe Hands', message: STATUS_MESSAGES.paused });
   }
 
   beginStep({ actions = [], resetMode = null } = {}) {
@@ -203,16 +268,21 @@ export class GestureInput {
 
   analyzeFrame(now) {
     if (!this.handLandmarker) {
-      this.emitStatus({ state: 'loading', action: null, engine: 'MediaPipe Hands' });
+      this.emitStatus({ state: 'loading', action: null, engine: 'MediaPipe Hands', message: STATUS_MESSAGES.loading });
       return;
     }
 
     if (!this.videoElement.srcObject || this.videoElement.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
-      this.emitStatus({ state: 'waiting-camera', action: null, engine: 'MediaPipe Hands' });
+      this.emitStatus({ state: 'waiting-camera', action: null, engine: 'MediaPipe Hands', message: STATUS_MESSAGES['waiting-camera'] });
       return;
     }
 
-    const result = this.handLandmarker.detectForVideo(this.videoElement, now);
+    let result;
+    try {
+      result = this.handLandmarker.detectForVideo(this.videoElement, now);
+    } catch {
+      return;
+    }
     const hands = this.describeHands(result);
     const hand = this.pickHand(hands);
 
@@ -229,6 +299,7 @@ export class GestureInput {
         engine: 'MediaPipe Hands',
         hands,
         handCount: hands.length,
+        message: STATUS_MESSAGES.searching,
       });
       return;
     }
@@ -260,8 +331,13 @@ export class GestureInput {
     const accepted = this.maybeEmitAction(action, now);
 
     this.previousPose = pose;
+    const state = accepted ? 'accepted' : gate.armed ? 'tracking' : 'waiting-reset';
+    let message = gate.hint || STATUS_MESSAGES[state] || STATUS_MESSAGES.tracking;
+    if (state === 'tracking' && liftState?.progress > 0 && liftState.progress < 1) {
+      message = `托起中 ${Math.round(liftState.progress * 100)}%`;
+    }
     this.emitStatus({
-      state: accepted ? 'accepted' : gate.armed ? 'tracking' : 'waiting-reset',
+      state,
       action,
       engine: 'MediaPipe Hands',
       hand,
@@ -273,6 +349,7 @@ export class GestureInput {
       handCount: hands.length,
       cooldown: Math.max(0, ACTION_COOLDOWN_MS - (now - this.lastAcceptedAt)),
       resetHint: gate.hint,
+      message,
     });
   }
 
@@ -370,7 +447,7 @@ export class GestureInput {
     }
 
     const tracking = this.liftTracking;
-    // 接受张开手掌或普通手掌姿势（让手机端更容易触发）
+    // 接受张开手掌或普通手掌姿势
     if (!['open', 'hand'].includes(pose)) {
       tracking.last = null;
       tracking.holdStartedAt = null;
@@ -385,13 +462,14 @@ export class GestureInput {
       point.x >= GESTURE_THRESHOLDS.liftMinX &&
       point.x <= GESTURE_THRESHOLDS.liftMaxX;
 
-    // 允许从画面上方开始追踪，或直接到达下方停留
-    const fromAbove = tracking.start && tracking.start.y < GESTURE_THRESHOLDS.liftMinY;
-    const atBottom = point.y >= GESTURE_THRESHOLDS.liftMinY;
-    const deltaY = tracking.start ? point.y - tracking.start.y : 0;
+    // 简化逻辑：只要张开手掌在画面中间区域停留即可触发
+    const inZone = inHorizontalZone;
+    const frameMovement = tracking.last
+      ? Math.hypot(point.x - tracking.last.x, point.y - tracking.last.y)
+      : Infinity;
 
-    if (!tracking.start || (!fromAbove && !atBottom)) {
-      // 重新锚定起点
+    if (!inZone) {
+      // 手不在中间区域，重置
       tracking.start = point;
       tracking.last = point;
       tracking.holdStartedAt = null;
@@ -401,21 +479,11 @@ export class GestureInput {
       return tracking;
     }
 
-    const moveProgress = Math.min(1, Math.max(0, deltaY / GESTURE_THRESHOLDS.liftMoveY));
-    const reachedTarget = inHorizontalZone && atBottom;
-
-    if (!reachedTarget) {
-      tracking.holdStartedAt = null;
-      tracking.holdMs = 0;
-      tracking.phase = 'move';
-      tracking.progress = moveProgress * 0.75;
-      tracking.last = point;
-      return tracking;
+    // 在区域内，检查是否静止
+    if (!tracking.start) {
+      tracking.start = point;
     }
 
-    const frameMovement = tracking.last
-      ? Math.hypot(point.x - tracking.last.x, point.y - tracking.last.y)
-      : Infinity;
     if (frameMovement <= GESTURE_THRESHOLDS.liftFrameJitter) {
       if (tracking.holdStartedAt == null) tracking.holdStartedAt = now;
     } else {
@@ -423,8 +491,9 @@ export class GestureInput {
     }
 
     tracking.holdMs = tracking.holdStartedAt == null ? 0 : now - tracking.holdStartedAt;
-    tracking.phase = 'hold';
-    tracking.progress = 0.75 + Math.min(1, tracking.holdMs / GESTURE_THRESHOLDS.liftHoldMs) * 0.25;
+    const holdProgress = Math.min(1, tracking.holdMs / GESTURE_THRESHOLDS.liftHoldMs);
+    tracking.phase = holdProgress >= 1 ? 'hold' : 'move';
+    tracking.progress = holdProgress;
     tracking.last = point;
     return tracking;
   }
