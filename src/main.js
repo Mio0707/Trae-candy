@@ -55,11 +55,11 @@ function queryDOM() {
 }
 
 // ---- Init ----
-queryDOM();
-
-// Landing page: mode selection
-btnModeCamera.addEventListener('click', () => enterStage('camera'));
-btnModeButton.addEventListener('click', () => enterStage('button'));
+document.addEventListener('DOMContentLoaded', () => {
+  queryDOM();
+  btnModeCamera.addEventListener('click', () => enterStage('camera'));
+  btnModeButton.addEventListener('click', () => enterStage('button'));
+});
 
 async function enterStage(mode) {
   interactionMode = mode;
