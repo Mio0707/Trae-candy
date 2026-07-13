@@ -1137,8 +1137,7 @@ export class BeastStage extends EventTarget {
 
     if (step.id === 'lift-blessing') {
       if (!this.selectedFortune) this.selectedFortune = FORTUNES[0];
-      this.setStep(this.stepIndex + 1);
-      return true;
+      return this.startGestureSettle(GESTURE_SETTLE_DURATION * 2.5);
     }
 
     if (step.id === 'fortune-shell') {
@@ -1155,13 +1154,13 @@ export class BeastStage extends EventTarget {
     return true;
   }
 
-  startGestureSettle() {
+  startGestureSettle(duration = GESTURE_SETTLE_DURATION) {
     if (this.gestureSettle) return false;
 
     this.interactionPreviewTarget = 1;
     this.gestureSettle = {
       start: this.clock.getElapsedTime(),
-      duration: GESTURE_SETTLE_DURATION,
+      duration,
       from: this.interactionPreview,
       nextIndex: this.stepIndex + 1,
     };
