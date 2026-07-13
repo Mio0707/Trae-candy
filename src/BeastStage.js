@@ -1137,7 +1137,7 @@ export class BeastStage extends EventTarget {
 
     if (step.id === 'lift-blessing') {
       if (!this.selectedFortune) this.selectedFortune = FORTUNES[0];
-      return this.startGestureSettle(GESTURE_SETTLE_DURATION * 5);
+      return this.startGestureSettle(1.5);
     }
 
     if (step.id === 'fortune-shell') {
