@@ -109,8 +109,8 @@ function initGestureInput() {
 
   gestureInput = new GestureInput({
     videoElement: videoPreview,
-    wasmBaseUrl: '/runtime/mediapipe-wasm/',
-    modelUrl: '/runtime/hand_landmarker.task',
+    wasmBaseUrl: import.meta.env.BASE_URL + 'runtime/mediapipe-wasm/',
+    modelUrl: import.meta.env.BASE_URL + 'runtime/hand_landmarker.task',
     onAction: (action) => {
       if (!stage || !currentStep) return false;
       const stepConfig = getStep(currentStep.id);
@@ -156,7 +156,6 @@ async function toggleCamera() {
     gestureInput.stop();
     cameraActive = false;
     if (btnCamera) btnCamera.textContent = '开启摄像头';
-    if (videoPreview) videoPreview.classList.add('hidden');
     if (gestureStatus) gestureStatus.textContent = '';
     if (gestureHint) gestureHint.textContent = '';
     // 隐藏摄像头背景
@@ -164,7 +163,6 @@ async function toggleCamera() {
     if (cameraBgOverlay) cameraBgOverlay.classList.remove('active');
   } else {
     try {
-      if (videoPreview) videoPreview.classList.remove('hidden');
       await gestureInput.init();
       cameraActive = true;
       if (btnCamera) btnCamera.textContent = '关闭摄像头';
@@ -180,7 +178,6 @@ async function toggleCamera() {
       }
     } catch (err) {
       console.error('[Gesture] 摄像头启动失败:', err);
-      if (videoPreview) videoPreview.classList.add('hidden');
       const message = err?.message || '摄像头启动失败，请确保已授予摄像头权限。';
       if (gestureStatus) gestureStatus.textContent = message;
     }
@@ -281,7 +278,6 @@ btnNext.addEventListener('click', () => {
       gestureInput.stop();
       cameraActive = false;
       if (btnCamera) btnCamera.textContent = '开启摄像头';
-      if (videoPreview) videoPreview.classList.add('hidden');
       if (gestureStatus) gestureStatus.textContent = '';
       if (gestureHint) gestureHint.textContent = '';
     }
@@ -298,7 +294,6 @@ btnReset.addEventListener('click', () => {
     gestureInput.stop();
     cameraActive = false;
     if (btnCamera) btnCamera.textContent = '开启摄像头';
-    if (videoPreview) videoPreview.classList.add('hidden');
     if (gestureStatus) gestureStatus.textContent = '';
     if (gestureHint) gestureHint.textContent = '';
   }
@@ -312,7 +307,6 @@ btnResetBottom.addEventListener('click', () => {
     gestureInput.stop();
     cameraActive = false;
     if (btnCamera) btnCamera.textContent = '开启摄像头';
-    if (videoPreview) videoPreview.classList.add('hidden');
     if (gestureStatus) gestureStatus.textContent = '';
     if (gestureHint) gestureHint.textContent = '';
   }

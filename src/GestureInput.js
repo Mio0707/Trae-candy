@@ -7,7 +7,7 @@ const HOLD_MS = 900;
 const HISTORY_MS = 900;
 const TWO_HAND_HISTORY_MS = 700;
 const RESET_STABLE_MS = 280;
-const DEFAULT_WASM_BASE_URL = '/runtime/mediapipe-wasm';
+const DEFAULT_WASM_BASE_URL = import.meta.env.BASE_URL + 'runtime/mediapipe-wasm';
 
 const GESTURE_THRESHOLDS = {
   pinchDistance: 0.065,

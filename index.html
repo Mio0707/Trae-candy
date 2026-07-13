@@ -133,16 +133,13 @@ body {
 }
 #camera-bg-overlay.active { opacity: 1; }
 
-/* Video preview overlay */
+/* Video element for MediaPipe — hidden but functional */
 #video-preview {
-  position: absolute; bottom: 12px; right: 12px;
-  width: 160px; height: 120px;
-  border-radius: 10px; border: 2px solid var(--border);
-  object-fit: cover; z-index: 5;
-  background: #000;
-  box-shadow: var(--shadow);
+  position: absolute;
+  width: 1px; height: 1px;
+  opacity: 0; pointer-events: none;
+  z-index: -1;
 }
-#video-preview.hidden { display: none !important; }
 
 /* Loading & Error */
 #loading-indicator {
@@ -329,7 +326,7 @@ body {
           <div class="error-title">模型加载失败</div>
           <div class="error-detail" id="error-message"></div>
         </div>
-        <video id="video-preview" class="hidden" autoplay playsinline muted></video>
+        <video id="video-preview" autoplay playsinline muted></video>
       </div>
     </div>
 
