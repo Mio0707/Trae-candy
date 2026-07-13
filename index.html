@@ -66,7 +66,7 @@ body {
 .landing-inner {
   position: relative; z-index: 1;
   width: 100%; max-width: 560px;
-  padding: 30vh 32px 0;
+  padding: 15vh 32px 0;
   display: flex; flex-direction: column; align-items: center;
 }
 
@@ -115,7 +115,8 @@ body {
   line-height: 2;
   text-align: left;
   max-width: 513px;
-  animation: fadeUp 0.8s 0.75s cubic-bezier(0.16,1,0.3,1) both;
+  margin-top: 48px;
+  animation: fadeUp 0.8s 1.1s cubic-bezier(0.16,1,0.3,1) both;
 }
 
 @keyframes fadeUp {
@@ -126,7 +127,7 @@ body {
 /* CTA: mode choices */
 .landing-choices {
   display: flex; gap: 48px; justify-content: center;
-  margin-top: 72px;
+  margin-top: calc(15vh + 240px);
   animation: fadeUp 0.8s 0.95s cubic-bezier(0.16,1,0.3,1) both;
 }
 
@@ -492,11 +493,6 @@ body {
   <div class="landing-inner">
     <div class="landing-title">吹糖造物</div>
     <div class="landing-sub">国家级非遗 · 天门糖塑</div>
-    <div class="landing-desc">
-      天门糖塑距今已有约 1400 年历史，曾被列为"湖北最美非物质文化遗产"。<br>
-      通过手势互动，模拟吹、捏、拉、贴等真实工艺，<br>
-      制作一只属于自己的糖塑瑞兽。
-    </div>
     <div class="landing-choices">
       <button class="choice-btn" id="btn-mode-camera">
         <div class="choice-icon camera">📷</div>
@@ -508,6 +504,11 @@ body {
         <div class="choice-label">按钮交互</div>
         <div class="choice-hint">点击推进 · 轻松体验</div>
       </button>
+    </div>
+    <div class="landing-desc">
+      天门糖塑距今已有约 1400 年历史，曾被列为"湖北最美非物质文化遗产"。<br>
+      通过手势互动，模拟吹、捏、拉、贴等真实工艺，<br>
+      制作一只属于自己的糖塑瑞兽。
     </div>
   </div>
   <div class="landing-footer">天门糖塑 · 国家级非物质文化遗产</div>
