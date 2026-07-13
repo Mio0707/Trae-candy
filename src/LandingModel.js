@@ -6,7 +6,7 @@ export class LandingModel {
     this.container = container;
     this.modelUrl = modelUrl;
     this.clock = new THREE.Clock();
-    this.rotationSpeed = 0.35;
+    this.rotationSpeed = 0.175;
     this.model = null;
     this.animationId = null;
     this.resizeObserver = null;
