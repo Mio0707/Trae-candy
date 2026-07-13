@@ -285,15 +285,20 @@ document.addEventListener('DOMContentLoaded', () => {
     currentStep = step;
     currentFortune = fortune;
 
-    if (stepTitle) stepTitle.textContent = step.title || '';
-    if (stepDesc) stepDesc.textContent = step.description || '';
-
-    if (stepOverlay) {
-      stepOverlay.classList.add('visible');
-      clearTimeout(stepOverlayTimer);
-      stepOverlayTimer = setTimeout(() => {
-        stepOverlay.classList.remove('visible');
-      }, 3000);
+    if (step.knowledge) {
+      if (stepTitle) stepTitle.textContent = '非遗小识';
+      if (stepDesc) stepDesc.textContent = step.knowledge;
+      if (stepOverlay) {
+        stepOverlay.classList.add('visible');
+        clearTimeout(stepOverlayTimer);
+      }
+    } else {
+      if (stepTitle) stepTitle.textContent = step.title || '';
+      if (stepDesc) stepDesc.textContent = step.description || '';
+      if (stepOverlay) {
+        stepOverlay.classList.add('visible');
+        clearTimeout(stepOverlayTimer);
+      }
     }
 
     if (step.knowledge) {

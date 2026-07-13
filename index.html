@@ -320,7 +320,7 @@ body {
   /* names hidden for minimal look */
 }
 
-/* Center-top: step info overlay (fades in/out on step change) */
+/* Center-top: 非遗小识 overlay */
 #step-overlay {
   position: absolute;
   top: 22%; left: 50%;
@@ -334,15 +334,23 @@ body {
 #step-overlay.visible { opacity: 1; }
 
 #step-overlay .step-title {
-  font-size: 2rem; font-weight: 800; letter-spacing: 6px;
-  color: var(--fg);
-  text-shadow: 0 4px 20px rgba(0,0,0,0.6);
-  margin-bottom: 12px;
+  font-size: 0.85rem; font-weight: 700; letter-spacing: 4px;
+  color: var(--gold);
+  text-shadow: 0 2px 12px rgba(241,188,54,0.3);
+  margin-bottom: 10px;
+  text-transform: uppercase;
 }
 #step-overlay .step-desc {
-  font-size: 0.95rem; color: var(--fg-muted);
-  max-width: 400px; margin: 0 auto;
+  font-size: 0.82rem; color: var(--fg-muted);
+  max-width: 420px; margin: 0 auto;
+  line-height: 1.7;
   text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  padding: 16px 24px;
+  background: rgba(42,20,8,0.7);
+  border-radius: 12px;
+  border: 1px solid rgba(232,155,60,0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 /* Bottom-center: gesture prompt */
@@ -663,6 +671,6 @@ body {
   </div>
 </div>
 
-<script type="module" src="/src/main.js?v=20260714"></script>
+<script type="module" src="/src/main.js?v=20260715"></script>
 </body>
 </html>
