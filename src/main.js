@@ -1,5 +1,6 @@
 import { BeastStage, FORTUNES } from './BeastStage.js';
 import { GestureInput } from './GestureInput.js';
+import { LandingModel } from './LandingModel.js';
 import { getStep, matchesStepGesture, getPhaseIndex } from './stage-content.js';
 import modelUrl from './assets/hulushi-web.glb?url';
 
@@ -21,6 +22,7 @@ window.addEventListener('unhandledrejection', (event) => {
 
 document.addEventListener('DOMContentLoaded', () => {
   let landing, stagePage, btnModeCamera, btnModeButton, stageContainer;
+  let landingModelContainer;
   let stepTitle, stepDesc, stepOverlay, knowledgeFloat, knowledgeText;
   let btnNext, btnReset, btnScreen, btnShare, btnResetBottom;
   let completeOverlay, fortuneDisplay, fortuneLabel, fortuneName, fortuneBlessing;
@@ -31,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let stage = null;
   let gestureInput = null;
+  let landingModel = null;
   let currentStep = null;
   let currentFortune = null;
   let cameraActive = false;
@@ -43,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnModeCamera = document.getElementById('btn-mode-camera');
     btnModeButton = document.getElementById('btn-mode-button');
     stageContainer = document.getElementById('beast-stage');
+    landingModelContainer = document.getElementById('landing-model');
 
     stepTitle = document.getElementById('step-title');
     stepDesc = document.getElementById('step-desc');
@@ -71,6 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   queryDOM();
+
+  initLandingModel();
 
   if (btnModeCamera) btnModeCamera.addEventListener('click', () => enterStage('camera'));
   if (btnModeButton) btnModeButton.addEventListener('click', () => enterStage('button'));
@@ -108,10 +114,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnShare) btnShare.addEventListener('click', generateShareCard);
 
+  function initLandingModel() {
+    if (!landingModelContainer) return;
+    try {
+      landingModel = new LandingModel(landingModelContainer, modelUrl);
+      landingModel.load().catch((err) => {
+        console.warn('[LandingModel] 加载失败:', err);
+      });
+    } catch (err) {
+      console.warn('[LandingModel] 初始化失败:', err);
+    }
+  }
+
   async function enterStage(mode) {
     interactionMode = mode;
 
     landing.classList.add('out');
+
+    if (landingModel) {
+      try { landingModel.dispose(); } catch (e) { /* ignore */ }
+      landingModel = null;
+    }
 
     setTimeout(() => {
       stagePage.classList.add('active');

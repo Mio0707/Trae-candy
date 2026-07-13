@@ -96,6 +96,23 @@ body {
   animation: fadeUp 0.8s 0.5s cubic-bezier(0.16,1,0.3,1) both;
 }
 
+.landing-model {
+  width: 100%;
+  height: 320px;
+  margin-top: 8px;
+  animation: modelReveal 1.2s 0.65s cubic-bezier(0.16,1,0.3,1) both;
+  position: relative;
+}
+.landing-model canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+@keyframes modelReveal {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 /* Thin divider — structural anchor */
 .landing-divider {
   width: 1px; height: 40px;
@@ -127,7 +144,7 @@ body {
 /* CTA: mode choices */
 .landing-choices {
   display: flex; gap: 48px; justify-content: center;
-  margin-top: calc(15vh + 240px);
+  margin-top: 16px;
   animation: fadeUp 0.8s 0.95s cubic-bezier(0.16,1,0.3,1) both;
 }
 
@@ -493,6 +510,7 @@ body {
   <div class="landing-inner">
     <div class="landing-title">吹糖造物</div>
     <div class="landing-sub">国家级非遗 · 天门糖塑</div>
+    <div class="landing-model" id="landing-model"></div>
     <div class="landing-choices">
       <button class="choice-btn" id="btn-mode-camera">
         <div class="choice-icon camera">📷</div>
