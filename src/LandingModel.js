@@ -15,7 +15,7 @@ export class LandingModel {
     this.scene.background = null;
 
     this.camera = new THREE.PerspectiveCamera(35, 1, 0.01, 100);
-    this.camera.position.set(0, 0.6, 3.6);
+    this.camera.position.set(0, 0.4, 3.6);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -76,7 +76,7 @@ export class LandingModel {
     const center = new THREE.Vector3();
     box.getCenter(center);
     this.model.position.sub(center);
-    this.model.position.y -= size.y * 0.1;
+    this.model.position.y += size.y * 0.12;
 
     gltf.scene.traverse((node) => {
       if (node.isMesh) {
