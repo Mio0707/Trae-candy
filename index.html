@@ -96,20 +96,9 @@ body {
 .landing-desc {
   font-size: 0.92rem; color: var(--fg-muted); line-height: 1.9;
   text-align: center;
-  padding: 24px 32px;
-  background: rgba(232,155,60,0.06);
-  border: 1px solid rgba(232,155,60,0.15);
-  border-radius: 16px;
-  max-width: 480px;
+  max-width: 460px;
   animation: fadeUp 1s 0.7s cubic-bezier(0.16,1,0.3,1) both;
-  position: relative;
 }
-.landing-desc::before {
-  content: ''; position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
-  width: 60px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-}
-.landing-desc strong { color: var(--fg); font-weight: 600; }
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(16px); }
@@ -123,50 +112,31 @@ body {
 }
 
 .choice-btn {
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  padding: 24px 28px;
-  background: rgba(232,155,60,0.08);
-  border: 1px solid var(--border);
-  border-radius: 18px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 20px 36px;
+  background: transparent;
+  border: none;
   cursor: pointer;
   transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
-  flex: 1; max-width: 240px;
+  flex: 1; max-width: 220px;
   font-family: inherit; color: var(--fg);
-  position: relative;
-  overflow: hidden;
-}
-.choice-btn::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
-  pointer-events: none;
 }
 .choice-btn:hover {
-  background: rgba(232,68,42,0.12);
-  border-color: rgba(232,68,42,0.35);
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 20px 50px rgba(232,68,42,0.18);
+  transform: translateY(-4px);
 }
-.choice-btn:active { transform: translateY(-2px) scale(0.98); }
+.choice-btn:active { transform: translateY(-1px) scale(0.98); }
 
 .choice-icon {
-  width: 52px; height: 52px;
+  width: 48px; height: 48px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   transition: all 0.3s ease;
 }
-.choice-icon.camera { 
-  background: rgba(232,68,42,0.15); 
-  color: var(--red);
-  box-shadow: 0 4px 15px rgba(232,68,42,0.2);
-}
-.choice-icon.button { 
-  background: rgba(241,188,54,0.15); 
-  color: var(--gold);
-  box-shadow: 0 4px 15px rgba(241,188,54,0.2);
-}
-.choice-btn:hover .choice-icon.camera { box-shadow: 0 6px 20px rgba(232,68,42,0.35); }
-.choice-btn:hover .choice-icon.button { box-shadow: 0 6px 20px rgba(241,188,54,0.35); }
+.choice-icon.camera { color: var(--red); }
+.choice-icon.button { color: var(--gold); }
+.choice-btn:hover .choice-icon.camera { transform: scale(1.1); }
+.choice-btn:hover .choice-icon.button { transform: scale(1.1); }
 
 .choice-label { font-size: 1rem; font-weight: 700; letter-spacing: 1px; }
 .choice-hint { font-size: 0.75rem; color: var(--fg-muted); }
@@ -593,6 +563,6 @@ body {
   </div>
 </div>
 
-<script type="module" src="/src/main.js?v=20260716"></script>
+<script type="module" src="/src/main.js?v=20260717"></script>
 </body>
 </html>
