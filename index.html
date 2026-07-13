@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>吹糖造物 - 天门糖塑互动体验</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F6EFE6;
+  --fg: #2C1810;
+  --fg-muted: #6B5244;
+  --red: #D73327;
+  --gold: #F1BC36;
+  --sugar: #C49A6C;
+  --card-bg: #FFF8F0;
+  --bubble-bg: #FFF8E7;
+  --border: #E8DDD0;
+  --radius: 12px;
+  --shadow: 0 4px 20px rgba(44,24,16,0.08);
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.7;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.hidden { display: none !important; }
+
+/* ========== Intro ========== */
+#intro-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+#intro-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.intro-card {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 48px 40px;
+  max-width: 480px;
+  width: 90%;
+  text-align: center;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.intro-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+  background: linear-gradient(90deg, var(--red), var(--gold), var(--sugar));
+}
+.intro-title { font-size: 2rem; font-weight: 800; color: var(--red); margin-bottom: 8px; letter-spacing: 4px; }
+.intro-subtitle { font-size: 0.95rem; color: var(--fg-muted); margin-bottom: 28px; }
+.intro-info {
+  text-align: left; background: var(--bubble-bg); border-radius: 10px;
+  padding: 20px; margin-bottom: 28px; font-size: 0.9rem; color: var(--fg-muted); line-height: 1.9;
+}
+.intro-info p { margin-bottom: 6px; }
+.intro-info strong { color: var(--fg); }
+.intro-buttons { display: flex; flex-direction: column; gap: 12px; }
+
+/* ========== Buttons ========== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 14px 28px; border: none; border-radius: 10px;
+  font-size: 1rem; font-weight: 600; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  font-family: inherit;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-primary { background: var(--red); color: #fff; box-shadow: 0 4px 12px rgba(215,51,39,0.3); }
+.btn-primary:hover:not(:disabled) { background: #c42e23; }
+.btn-secondary { background: var(--gold); color: var(--fg); box-shadow: 0 4px 12px rgba(241,188,54,0.3); }
+.btn-secondary:hover:not(:disabled) { background: #e0ad30; }
+.btn-outline { background: transparent; color: var(--fg); border: 2px solid var(--border); }
+.btn-outline:hover:not(:disabled) { border-color: var(--sugar); }
+.btn-small { padding: 10px 20px; font-size: 0.9rem; border-radius: 8px; }
+
+/* ========== App ========== */
+#app { display: none; min-height: 100vh; }
+#app.active { display: flex; flex-direction: column; }
+
+.app-header { text-align: center; padding: 16px 20px 8px; }
+.app-header h1 { font-size: 1.3rem; font-weight: 800; color: var(--red); letter-spacing: 3px; }
+
+.main-stage {
+  flex: 1; display: flex; gap: 24px;
+  padding: 12px 32px 32px; max-width: 1200px; margin: 0 auto; width: 100%;
+}
+
+/* ========== Left: 3D ========== */
+.stage-left { flex: 1; display: flex; flex-direction: column; position: relative; }
+#beast-stage {
+  width: 100%; flex: 1;
+  min-height: 500px;
+  background: radial-gradient(ellipse at center, #FFF8F0 0%, #F0E6D8 100%);
+  border-radius: 16px; border: 1px solid var(--border);
+  box-shadow: inset 0 2px 12px rgba(44,24,16,0.05);
+  position: relative; overflow: hidden;
+}
+#beast-stage canvas { display: block; width: 100% !important; height: 100% !important; }
+
+/* Video preview overlay */
+#video-preview {
+  position: absolute; bottom: 12px; right: 12px;
+  width: 160px; height: 120px;
+  border-radius: 10px; border: 2px solid var(--border);
+  object-fit: cover; z-index: 5;
+  background: #000;
+  box-shadow: var(--shadow);
+}
+#video-preview.hidden { display: none !important; }
+
+/* Loading & Error */
+#loading-indicator {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; background: rgba(246,239,230,0.85);
+  z-index: 10;
+}
+.spinner {
+  width: 40px; height: 40px; border: 4px solid var(--border);
+  border-top-color: var(--red); border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { color: var(--fg-muted); font-size: 0.9rem; }
+
+#model-error {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; background: rgba(246,239,230,0.9);
+  z-index: 10; padding: 40px; text-align: center;
+}
+#model-error .error-icon { font-size: 3rem; margin-bottom: 12px; }
+#model-error .error-title { font-size: 1.1rem; font-weight: 700; color: var(--red); margin-bottom: 8px; }
+#model-error .error-detail { font-size: 0.85rem; color: var(--fg-muted); }
+
+/* ========== Right Panel ========== */
+.stage-right {
+  width: 340px; flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+/* Progress */
+.progress-card {
+  background: var(--card-bg); border-radius: var(--radius);
+  padding: 16px 20px; border: 1px solid var(--border);
+}
+.progress-stages {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  position: relative;
+}
+.progress-stages::before {
+  content: ''; position: absolute; top: 16px; left: 28px; right: 28px;
+  height: 3px; background: var(--border); z-index: 0;
+}
+.progress-stage {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  z-index: 1; position: relative; flex: 1;
+}
+.stage-dot {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--card-bg); border: 3px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700; color: var(--fg-muted);
+  transition: all 0.4s ease;
+}
+.stage-dot.completed { border-color: var(--gold); background: var(--gold); color: #fff; }
+.stage-dot.active {
+  border-color: var(--red); background: var(--red); color: #fff;
+  box-shadow: 0 0 0 4px rgba(215,51,39,0.15);
+}
+.stage-name { font-size: 0.7rem; color: var(--fg-muted); text-align: center; white-space: nowrap; }
+.stage-name.completed { color: var(--gold); font-weight: 600; }
+.stage-name.active { color: var(--red); font-weight: 600; }
+
+/* Step info */
+.step-card {
+  background: var(--card-bg); border-radius: var(--radius);
+  padding: 20px; border: 1px solid var(--border);
+}
+#step-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+#step-desc { font-size: 0.9rem; color: var(--fg-muted); }
+
+/* Knowledge bubble */
+.knowledge-card {
+  background: var(--bubble-bg); border-radius: 10px;
+  padding: 14px 16px; border-left: 4px solid var(--sugar);
+  animation: bubbleIn 0.5s ease forwards;
+}
+@keyframes bubbleIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.knowledge-tag {
+  display: inline-block; font-size: 0.7rem; font-weight: 700;
+  color: var(--sugar); letter-spacing: 1px; margin-bottom: 4px;
+}
+#knowledge-text { font-size: 0.85rem; color: var(--fg-muted); line-height: 1.7; }
+
+/* Actions */
+.actions-card {
+  background: var(--card-bg); border-radius: var(--radius);
+  padding: 16px 20px; border: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 10px;
+}
+#stage-hint { font-size: 0.8rem; color: var(--fg-muted); }
+#gesture-hint {
+  font-size: 0.8rem; color: var(--sugar);
+  background: var(--bubble-bg); border-radius: 6px;
+  padding: 6px 10px; border-left: 3px solid var(--sugar);
+}
+#gesture-status {
+  font-size: 0.75rem; color: var(--fg-muted);
+  min-height: 1.2em;
+}
+.actions-row { display: flex; gap: 8px; }
+.actions-row .btn { flex: 1; }
+
+/* ========== Complete Section ========== */
+#complete-section {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: linear-gradient(0deg, var(--card-bg) 0%, rgba(255,248,240,0.95) 100%);
+  border-top: 1px solid var(--border);
+  padding: 20px 32px; backdrop-filter: blur(8px);
+}
+.complete-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+}
+#fortune-display { display: flex; align-items: center; gap: 16px; }
+#fortune-label {
+  font-size: 2.5rem; font-weight: 800; width: 64px; height: 64px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; color: #fff;
+}
+.complete-info { display: flex; flex-direction: column; }
+#fortune-name { font-size: 1.1rem; font-weight: 700; }
+#fortune-blessing { font-size: 0.9rem; color: var(--fg-muted); }
+.complete-actions { display: flex; gap: 10px; }
+
+/* ========== Footer ========== */
+.app-footer {
+  text-align: center; padding: 20px; font-size: 0.8rem;
+  color: var(--fg-muted); border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+.app-footer a { color: var(--sugar); text-decoration: none; }
+
+/* ========== Responsive ========== */
+@media (max-width: 900px) {
+  .main-stage { flex-direction: column; padding: 12px 16px 16px; }
+  .stage-right { width: 100%; }
+  #beast-stage { min-height: 360px; }
+  .complete-inner { flex-direction: column; text-align: center; }
+  #fortune-display { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Intro ===== -->
+<div id="intro-overlay">
+  <div class="intro-card">
+    <div class="intro-title">吹糖造物</div>
+    <div class="intro-subtitle">灵感来自国家级非遗 · 天门糖塑</div>
+    <div class="intro-info">
+      <p><strong>体验流程</strong>：六个阶段 · 约两分钟</p>
+      <p><strong>基础动作</strong>：张开手掌 · 握紧拳头 · 两指开合</p>
+      <p>本体验基于吹、捏、拉、贴等糖塑造型语言进行数字化互动表达。</p>
+    </div>
+    <div class="intro-buttons">
+      <button class="btn btn-primary" id="btn-enter">开始体验</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== App ===== -->
+<div id="app">
+  <header class="app-header">
+    <h1>吹糖造物</h1>
+  </header>
+
+  <div class="main-stage">
+    <!-- Left: 3D -->
+    <div class="stage-left">
+      <div id="beast-stage">
+        <div id="loading-indicator">
+          <div class="spinner"></div>
+          <div class="loading-text">正在加载糖塑瑞兽模型…</div>
+        </div>
+        <div id="model-error" class="hidden">
+          <div class="error-icon">⚠️</div>
+          <div class="error-title">模型加载失败</div>
+          <div class="error-detail" id="error-message"></div>
+        </div>
+        <video id="video-preview" class="hidden" autoplay playsinline muted></video>
+      </div>
+    </div>
+
+    <!-- Right: Info -->
+    <div class="stage-right">
+      <!-- Progress -->
+      <div class="progress-card">
+        <div class="progress-stages">
+          <div class="progress-stage">
+            <div class="stage-dot">1</div>
+            <div class="stage-name">底座</div>
+          </div>
+          <div class="progress-stage">
+            <div class="stage-dot">2</div>
+            <div class="stage-name">身体</div>
+          </div>
+          <div class="progress-stage">
+            <div class="stage-dot">3</div>
+            <div class="stage-name">四肢</div>
+          </div>
+          <div class="progress-stage">
+            <div class="stage-dot">4</div>
+            <div class="stage-name">头部</div>
+          </div>
+          <div class="progress-stage">
+            <div class="stage-dot">5</div>
+            <div class="stage-name">装饰</div>
+          </div>
+          <div class="progress-stage">
+            <div class="stage-dot">6</div>
+            <div class="stage-name">赐福</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step Info -->
+      <div class="step-card">
+        <div id="step-title">准备开始</div>
+        <div id="step-desc">点击"开始体验"按钮，进入糖塑造物之旅。</div>
+      </div>
+
+      <!-- Knowledge Bubble -->
+      <div class="knowledge-card" id="knowledge-bubble">
+        <div class="knowledge-tag">🧧 非遗小识</div>
+        <div id="knowledge-text"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions-card">
+        <div id="stage-hint"></div>
+        <div id="gesture-hint"></div>
+        <div id="gesture-status"></div>
+        <div class="actions-row">
+          <button class="btn btn-primary" id="btn-next">继续造物</button>
+          <button class="btn btn-outline btn-small" id="btn-screen" title="全屏">⛶</button>
+        </div>
+        <div class="actions-row">
+          <button class="btn btn-outline btn-small" id="btn-camera">开启摄像头</button>
+          <button class="btn btn-outline btn-small" id="btn-reset">重新开始</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Complete Section ===== -->
+  <div id="complete-section" class="hidden">
+    <div class="complete-inner">
+      <div id="fortune-display" class="hidden">
+        <div id="fortune-label">顺</div>
+        <div class="complete-info">
+          <div id="fortune-name">顺遂</div>
+          <div id="fortune-blessing">愿你一路顺遂，所行皆有回响。</div>
+        </div>
+      </div>
+      <div class="complete-actions">
+        <button class="btn btn-primary btn-small" id="btn-reset-bottom">再造一只</button>
+        <button class="btn btn-secondary btn-small" id="btn-share">保存分享卡</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    灵感来自<a href="#">国家级非物质文化遗产 · 天门糖塑</a>。本体验基于吹、捏、拉、贴等糖塑造型语言进行数字化互动表达。
+  </footer>
+</div>
+
+<script type="module" src="/src/main.js?v=20260713"></script>
+</body>
+</html>
