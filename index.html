@@ -8,14 +8,16 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #1a0e08;
+  --bg: #2a1408;
+  --bg-warm: #3a1a0a;
   --fg: #f5e6d3;
-  --fg-muted: #a08a72;
-  --red: #d73327;
+  --fg-muted: #c49a6c;
+  --red: #e8442a;
   --gold: #f1bc36;
+  --amber: #e89b3c;
   --sugar: #c49a6c;
-  --card-bg: rgba(26,14,8,0.85);
-  --border: rgba(196,154,108,0.2);
+  --card-bg: rgba(42,20,8,0.85);
+  --border: rgba(228,155,60,0.25);
   --radius: 12px;
 }
 
@@ -36,17 +38,18 @@ body {
 #landing {
   position: fixed; inset: 0; z-index: 100;
   display: flex; align-items: center; justify-content: center;
-  background: var(--bg);
+  background: linear-gradient(160deg, #3a1a0a 0%, #2a1408 40%, #1e0e04 100%);
   transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1), visibility 0.8s;
 }
 #landing.out { opacity: 0; visibility: hidden; pointer-events: none; }
 
-/* animated background grain */
+/* warm glow background */
 #landing::before {
   content: ''; position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(215,51,39,0.08) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 50% at 30% 70%, rgba(241,188,54,0.06) 0%, transparent 60%);
+    radial-gradient(ellipse 80% 60% at 50% 35%, rgba(232,68,42,0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 30% 75%, rgba(241,188,54,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 75% 60%, rgba(232,155,60,0.10) 0%, transparent 65%);
   animation: landingPulse 6s ease-in-out infinite alternate;
 }
 @keyframes landingPulse {
@@ -69,17 +72,6 @@ body {
   max-width: 520px; width: 100%;
 }
 
-/* Decorative top line */
-.landing-deco {
-  width: 60px; height: 2px; margin: 0 auto 32px;
-  background: linear-gradient(90deg, transparent, var(--red), var(--gold), transparent);
-  animation: decoGlow 3s ease-in-out infinite alternate;
-}
-@keyframes decoGlow {
-  0% { width: 40px; opacity: 0.5; }
-  100% { width: 80px; opacity: 1; }
-}
-
 .landing-title {
   font-size: 3.2rem; font-weight: 900;
   letter-spacing: 12px; margin-bottom: 12px;
@@ -94,7 +86,7 @@ body {
 }
 
 .landing-sub {
-  font-size: 0.95rem; color: var(--fg-muted); letter-spacing: 2px;
+  font-size: 0.95rem; color: var(--amber); letter-spacing: 2px;
   margin-bottom: 36px;
   animation: fadeUp 1s 0.3s cubic-bezier(0.16,1,0.3,1) both;
 }
@@ -103,8 +95,8 @@ body {
   font-size: 0.88rem; color: var(--fg-muted); line-height: 2;
   margin-bottom: 40px; text-align: left;
   padding: 20px 24px;
-  background: rgba(196,154,108,0.06);
-  border-left: 3px solid var(--red);
+  background: rgba(232,155,60,0.08);
+  border-left: 3px solid var(--amber);
   border-radius: 0 8px 8px 0;
   animation: fadeUp 1s 0.5s cubic-bezier(0.16,1,0.3,1) both;
 }
@@ -123,7 +115,7 @@ body {
 .choice-btn {
   display: flex; flex-direction: column; align-items: center; gap: 12px;
   padding: 28px 32px;
-  background: rgba(196,154,108,0.08);
+  background: rgba(232,155,60,0.1);
   border: 1px solid var(--border);
   border-radius: 16px;
   cursor: pointer;
@@ -132,10 +124,10 @@ body {
   font-family: inherit; color: var(--fg);
 }
 .choice-btn:hover {
-  background: rgba(215,51,39,0.12);
-  border-color: rgba(215,51,39,0.4);
+  background: rgba(232,68,42,0.15);
+  border-color: rgba(232,68,42,0.4);
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(215,51,39,0.15);
+  box-shadow: 0 12px 40px rgba(232,68,42,0.2);
 }
 .choice-btn:active { transform: translateY(-1px) scale(0.98); }
 
@@ -145,14 +137,14 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-size: 1.5rem;
 }
-.choice-icon.camera { background: rgba(215,51,39,0.15); color: var(--red); }
-.choice-icon.button { background: rgba(241,188,54,0.15); color: var(--gold); }
+.choice-icon.camera { background: rgba(232,68,42,0.18); color: var(--red); }
+.choice-icon.button { background: rgba(241,188,54,0.18); color: var(--gold); }
 
 .choice-label { font-size: 1rem; font-weight: 700; letter-spacing: 1px; }
 .choice-hint { font-size: 0.75rem; color: var(--fg-muted); }
 
 .landing-footer {
-  margin-top: 48px; font-size: 0.7rem; color: rgba(160,138,114,0.5);
+  margin-top: 48px; font-size: 0.7rem; color: rgba(196,138,76,0.5);
   letter-spacing: 1px;
   animation: fadeUp 1s 0.9s cubic-bezier(0.16,1,0.3,1) both;
 }
@@ -169,7 +161,7 @@ body {
 /* Full-screen 3D container */
 #beast-stage {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 45%, #2a1a10 0%, #0d0604 100%);
+  background: radial-gradient(ellipse at 50% 45%, #3a1a0a 0%, #1e0e04 100%);
 }
 #beast-stage canvas {
   display: block; width: 100% !important; height: 100% !important;
@@ -188,7 +180,8 @@ body {
 #camera-bg.active { opacity: 1; }
 #camera-bg-overlay {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at center, rgba(26,14,8,0.5) 0%, rgba(13,6,4,0.7) 100%);
+  background: radial-gradient(ellipse at center, rgba(58,26,10,0.35) 0%, rgba(30,14,4,0.6) 100%),
+              linear-gradient(180deg, rgba(232,155,60,0.08) 0%, transparent 50%, rgba(232,68,42,0.06) 100%);
   z-index: 1; opacity: 0; transition: opacity 0.6s ease;
   pointer-events: none;
 }
@@ -474,7 +467,6 @@ body {
      ============================================================ -->
 <div id="landing">
   <div class="landing-inner">
-    <div class="landing-deco"></div>
     <div class="landing-title">吹糖造物</div>
     <div class="landing-sub">灵感来自国家级非遗 · 天门糖塑</div>
     <div class="landing-desc">
@@ -572,6 +564,6 @@ body {
   </div>
 </div>
 
-<script type="module" src="/src/main.js?v=20260713"></script>
+<script type="module" src="/src/main.js?v=20260714"></script>
 </body>
 </html>
