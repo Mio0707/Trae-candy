@@ -192,6 +192,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function returnToLanding() {
+    // 停止所有音频
+    if (audioManager) {
+      audioManager.stop();
+    }
+    // 停止摄像头
+    stopCamera();
+    // 重置舞台
+    if (stage) {
+      stage.reset();
+    }
+    // 隐藏舞台页面
+    stagePage.classList.remove('active');
+    // 显示首页
+    landing.classList.remove('out');
+    // 重新初始化首页模型
+    initLandingModel();
+  }
+
   async function initStage() {
     try {
       console.log('initStage called, stageContainer:', !!stageContainer);
@@ -398,14 +417,11 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (phase === phaseIndex) dot.classList.add('active');
     });
 
-    if (step.id === 'blessing-complete' && fortune) {
-      completeOverlay.classList.add('visible');
-      fortuneLabel.textContent = fortune.label;
-      fortuneName.textContent = fortune.name;
-      fortuneBlessing.textContent = fortune.blessing;
-      fortuneLabel.style.color = fortune.color ? '#' + fortune.color.toString(16).padStart(6, '0') : '#d73327';
-    } else {
-      completeOverlay.classList.remove('visible');
+    // 完成时自动返回首页
+    if (step.id === 'blessing-complete') {
+      setTimeout(() => {
+        returnToLanding();
+      }, 2000);
     }
 
     const isFinal = step.id === 'blessing-complete';
