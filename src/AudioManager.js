@@ -2,7 +2,7 @@ export class AudioManager {
   constructor() {
     this.audioMap = new Map();
     this.currentAudio = null;
-    this.enabled = true;  // 默认启用
+    this.enabled = false;  // 默认禁用，由首页讲解模式按钮控制
     this.basePath = import.meta.env.BASE_URL + 'assets/audio/';
     this.supported = 'AudioContext' in window;
   }
@@ -42,8 +42,8 @@ export class AudioManager {
     });
   }
 
-  play(id) {
-    if (!this.enabled || !this.supported) return;
+  play(id, force = false) {
+    if ((!this.enabled && !force) || !this.supported) return;
 
     this.stop();
 

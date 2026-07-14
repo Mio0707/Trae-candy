@@ -70,6 +70,32 @@ body {
   display: flex; flex-direction: column; align-items: center;
 }
 
+.landing-audio-btn {
+  position: absolute;
+  top: 12px;
+  right: 0;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(196,154,108,0.1);
+  border: 1px solid rgba(196,154,108,0.2);
+  color: var(--fg-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.25s;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2;
+}
+.landing-audio-btn:hover {
+  background: rgba(196,154,108,0.2);
+  border-color: rgba(196,154,108,0.4);
+  transform: scale(1.05);
+}
+.landing-audio-btn.active {
+  background: rgba(241,188,54,0.15);
+  border-color: rgba(241,188,54,0.4);
+  color: var(--gold);
+}
+
 /* Hero: brand as the loudest element */
 .landing-title {
   font-size: clamp(2.4rem, 8vw, 3.4rem);
@@ -526,6 +552,7 @@ body {
      ============================================================ -->
 <div id="landing">
   <div class="landing-inner">
+    <button class="landing-audio-btn" id="btn-landing-audio" title="语音讲解">🔇</button>
     <div class="landing-title">吹糖造物</div>
     <div class="landing-sub">国家级非遗 · 天门糖塑</div>
     <div class="landing-model" id="landing-model"></div>

@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let progDots;
   let videoPreview, gestureStatus, gestureHint, btnCamera;
   let stageTitle;
+  let btnLandingAudio;
 
   let stage = null;
   let gestureInput = null;
@@ -41,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let cameraActive = false;
   let interactionMode = null;
   let stepOverlayTimer = null;
+  let guideMode = false;  // 讲解模式：首页开启后，进入舞台自动播放音频
 
   function queryDOM() {
     landing = document.getElementById('landing');
@@ -75,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     gestureHint = document.getElementById('gesture-hint');
     btnCamera = document.getElementById('btn-camera');
     stageTitle = document.getElementById('stage-title');
+    btnLandingAudio = document.getElementById('btn-landing-audio');
   }
 
   queryDOM();
@@ -83,6 +86,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnModeCamera) btnModeCamera.addEventListener('click', () => enterStage('camera'));
   if (btnModeButton) btnModeButton.addEventListener('click', () => enterStage('button'));
+
+  // 首页讲解模式按钮
+  if (btnLandingAudio) {
+    btnLandingAudio.addEventListener('click', () => {
+      guideMode = !guideMode;
+      btnLandingAudio.textContent = guideMode ? '🔊' : '🔇';
+      btnLandingAudio.classList.toggle('active', guideMode);
+      btnLandingAudio.title = guideMode ? '讲解模式已开启' : '点击开启讲解模式';
+    });
+  }
 
   if (btnNext) btnNext.addEventListener('click', () => {
     if (!stage) return;
@@ -117,10 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnShare) btnShare.addEventListener('click', generateShareCard);
 
+  // 舞台内声音按钮：点击播放当前步骤对应的非遗文案（强制播放，不受 guideMode 限制）
   if (btnAudio) btnAudio.addEventListener('click', () => {
-    if (audioManager) {
-      const enabled = audioManager.toggle();
-      btnAudio.textContent = enabled ? '🔊' : '🔇';
+    if (audioManager && currentStep) {
+      audioManager.play(currentStep.id, true);
     }
   });
 
@@ -196,11 +209,12 @@ document.addEventListener('DOMContentLoaded', () => {
       await stage.load();
       loadingIndicator.classList.add('hidden');
 
-      // 确保音频管理器已初始化
+      // 确保音频管理器已初始化，并根据讲解模式设置开关
       if (!audioManager) {
         audioManager = new AudioManager();
         await audioManager.init();
       }
+      audioManager.enabled = guideMode;
 
       updateUI(stage.getState());
 
