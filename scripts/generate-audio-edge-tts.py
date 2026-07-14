@@ -34,7 +34,13 @@ AUDIO_TEXTS = [
 
 async def generate_audio(text: str, output_path: str):
     """使用 edge-tts 生成音频"""
-    communicate = edge_tts.Communicate(text, VOICE)
+    communicate = edge_tts.Communicate(
+        text, 
+        VOICE,
+        proxy='http://127.0.0.1:18080',
+        connect_timeout=30,
+        receive_timeout=120
+    )
     await communicate.save(output_path)
 
 async def main():
