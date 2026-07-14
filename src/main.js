@@ -417,13 +417,6 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (phase === phaseIndex) dot.classList.add('active');
     });
 
-    // 完成时自动返回首页
-    if (step.id === 'blessing-complete') {
-      setTimeout(() => {
-        returnToLanding();
-      }, 2000);
-    }
-
     const isFinal = step.id === 'blessing-complete';
     btnNext.textContent = isFinal ? '重来' : '继续';
     btnNext.disabled = false;
