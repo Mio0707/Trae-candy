@@ -134,10 +134,26 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       console.warn('[LandingModel] 初始化失败:', err);
     }
+
+    // 初始化音频管理器并播放首页介绍
+    initAudio();
+  }
+
+  async function initAudio() {
+    if (!audioManager) {
+      audioManager = new AudioManager();
+      await audioManager.init();
+      console.log('[Audio] 音频管理器已初始化');
+    }
   }
 
   async function enterStage(mode) {
     interactionMode = mode;
+
+    // 停止首页音频
+    if (audioManager) {
+      audioManager.stop();
+    }
 
     landing.classList.add('out');
 
@@ -152,13 +168,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 400);
   }
 
+  function playLandingAudio() {
+    if (audioManager && audioManager.enabled) {
+      audioManager.play('landing-intro');
+    }
+  }
+
   async function initStage() {
     try {
       console.log('initStage called, stageContainer:', !!stageContainer);
-      
+
       stage = new BeastStage(stageContainer, { modelUrl });
       console.log('stage created:', stage);
-      
+
       if (!stage || typeof stage.addEventListener !== 'function') {
         throw new Error('stage is not a valid EventTarget');
       }
@@ -173,12 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
       loadingIndicator.classList.remove('hidden');
       await stage.load();
       loadingIndicator.classList.add('hidden');
-      
+
+      // 确保音频管理器已初始化
       if (!audioManager) {
         audioManager = new AudioManager();
         await audioManager.init();
       }
-      
+
       updateUI(stage.getState());
 
       initGestureInput();

@@ -2,8 +2,8 @@ export class AudioManager {
   constructor() {
     this.audioMap = new Map();
     this.currentAudio = null;
-    this.enabled = false;
-    this.basePath = 'assets/audio/';
+    this.enabled = true;  // 默认启用
+    this.basePath = import.meta.env.BASE_URL + 'assets/audio/';
     this.supported = 'AudioContext' in window;
   }
 
