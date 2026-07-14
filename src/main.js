@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let landing, stagePage, btnModeCamera, btnModeButton, stageContainer;
   let landingModelContainer;
   let stepTitle, stepDesc, stepOverlay, knowledgeFloat, knowledgeText;
-  let btnNext, btnReset, btnScreen, btnAudio, btnResetBottom;
+  let btnNext, btnReset, btnAudio, btnResetBottom;
   let completeOverlay, fortuneDisplay, fortuneLabel, fortuneName, fortuneBlessing;
   let loadingIndicator, modelError, errorMessage;
   let progDots;
@@ -59,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
     knowledgeText = document.getElementById('knowledge-text');
     btnNext = document.getElementById('btn-next');
     btnReset = document.getElementById('btn-reset');
-    btnScreen = document.getElementById('btn-screen');
     btnAudio = document.getElementById('btn-audio');
     btnResetBottom = document.getElementById('btn-reset-bottom');
     completeOverlay = document.getElementById('complete-overlay');
@@ -127,12 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
     stopCamera();
     stage.reset();
     completeOverlay.classList.remove('visible');
-  });
-
-  if (btnScreen) btnScreen.addEventListener('click', () => {
-    const el = document.documentElement;
-    if (el.requestFullscreen) el.requestFullscreen();
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
   });
 
   // 舞台内声音按钮：点击播放当前步骤对应的非遗文案（强制播放，不受 guideMode 限制）
