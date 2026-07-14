@@ -2,6 +2,7 @@ import { BeastStage, FORTUNES } from './BeastStage.js';
 import { GestureInput } from './GestureInput.js';
 import { LandingModel } from './LandingModel.js';
 import { getStep, matchesStepGesture, getPhaseIndex } from './stage-content.js';
+import { AudioManager } from './AudioManager.js';
 import modelUrl from './assets/hulushi-web.glb?url';
 
 window.addEventListener('error', (event) => {
@@ -24,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let landing, stagePage, btnModeCamera, btnModeButton, stageContainer;
   let landingModelContainer;
   let stepTitle, stepDesc, stepOverlay, knowledgeFloat, knowledgeText;
-  let btnNext, btnReset, btnScreen, btnShare, btnResetBottom;
+  let btnNext, btnReset, btnScreen, btnShare, btnAudio, btnResetBottom;
   let completeOverlay, fortuneDisplay, fortuneLabel, fortuneName, fortuneBlessing;
   let loadingIndicator, modelError, errorMessage;
   let progDots;
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let stage = null;
   let gestureInput = null;
   let landingModel = null;
+  let audioManager = null;
   let currentStep = null;
   let currentFortune = null;
   let cameraActive = false;
@@ -57,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnReset = document.getElementById('btn-reset');
     btnScreen = document.getElementById('btn-screen');
     btnShare = document.getElementById('btn-share');
+    btnAudio = document.getElementById('btn-audio');
     btnResetBottom = document.getElementById('btn-reset-bottom');
     completeOverlay = document.getElementById('complete-overlay');
     fortuneLabel = document.getElementById('fortune-label');
@@ -114,6 +117,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnShare) btnShare.addEventListener('click', generateShareCard);
 
+  if (btnAudio) btnAudio.addEventListener('click', () => {
+    if (audioManager) {
+      const enabled = audioManager.toggle();
+      btnAudio.textContent = enabled ? '🔊' : '🔇';
+    }
+  });
+
   function initLandingModel() {
     if (!landingModelContainer) return;
     try {
@@ -163,6 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
       loadingIndicator.classList.remove('hidden');
       await stage.load();
       loadingIndicator.classList.add('hidden');
+      
+      if (!audioManager) {
+        audioManager = new AudioManager();
+        await audioManager.init();
+      }
+      
       updateUI(stage.getState());
 
       initGestureInput();
@@ -314,6 +330,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (stepOverlay) {
         stepOverlay.classList.add('visible');
         clearTimeout(stepOverlayTimer);
+      }
+      if (audioManager && audioManager.enabled) {
+        audioManager.play(step.id);
       }
     } else {
       if (stepTitle) stepTitle.textContent = step.title || '';
