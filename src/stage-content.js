@@ -57,7 +57,7 @@ export const STAGE_STEPS = [
     description: '张开手掌，让红色头部糖块在空中逐渐出现。',
     stageHint: '张开手掌，让头部糖料逐渐成形', sequenceHint: '收拢手指 → 张开手掌',
     gesture: { actions: ['open'], resetMode: 'closed-hand', recognitionHint: '先收拢手指，再张掌让头部出现' },
-    knowledge: '头部是糖塑最关键的部分，艺人往往先精心构思头部的造型',
+    knowledge: '',
     animation: 'head-form',
   },
   {
@@ -73,7 +73,7 @@ export const STAGE_STEPS = [
     description: '先合拢拇指和食指，再逐渐张开，让尾巴和两个耳朵糖片在空中出现。',
     stageHint: '张开两指，制作尾巴和耳朵糖片', sequenceHint: '两指合拢 → 逐渐张开',
     gesture: { actions: ['thumb-index-spread'], resetMode: 'thumb-index-closed', recognitionHint: '先合拢拇指和食指，再逐渐张开让尾巴和耳朵出现' },
-    knowledge: '装饰是糖塑的点睛之笔，尾巴和耳朵能让瑞兽更显灵动',
+    knowledge: '',
     animation: 'tail-and-ears-form',
   },
   {
@@ -97,7 +97,7 @@ export const STAGE_STEPS = [
     description: '张开手掌，让圆球糖料在空中逐渐出现。',
     stageHint: '张开手掌，把糖料团成爪下圆球', sequenceHint: '收拢手指 → 张开手掌',
     gesture: { actions: ['open'], resetMode: 'closed-hand', recognitionHint: '先收拢手指，再张掌让圆球出现' },
-    knowledge: '圆球象征圆满吉祥，是天门糖塑中常见的吉祥元素',
+    knowledge: '',
     animation: 'ball-form',
   },
   {
