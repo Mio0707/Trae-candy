@@ -153,11 +153,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initAudio();
   }
 
-  async function initAudio() {
+  function initAudio() {
     if (!audioManager) {
       audioManager = new AudioManager();
-      await audioManager.init();
-      console.log('[Audio] 音频管理器已初始化');
+      audioManager.init();
     }
   }
 

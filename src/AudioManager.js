@@ -2,12 +2,12 @@ export class AudioManager {
   constructor() {
     this.audioMap = new Map();
     this.currentAudio = null;
-    this.enabled = false;  // 默认禁用，由首页讲解模式按钮控制
+    this.enabled = false;
     this.basePath = import.meta.env.BASE_URL + 'assets/audio/';
-    this.supported = 'AudioContext' in window;
+    this.supported = typeof Audio !== 'undefined';
   }
 
-  async init() {
+  init() {
     if (!this.supported) {
       console.warn('Audio not supported');
       return;
@@ -21,25 +21,14 @@ export class AudioManager {
     ];
 
     for (const id of audioIds) {
-      await this.preload(id);
+      const audio = new Audio(`${this.basePath}${id}.mp3`);
+      audio.preload = 'auto';
+      audio.playsInline = true;
+      // 立即加入 map，不等待 loadeddata（移动端可能永远不触发）
+      this.audioMap.set(id, audio);
     }
 
     this.enabled = true;
-  }
-
-  async preload(id) {
-    return new Promise((resolve) => {
-      const audio = new Audio(`${this.basePath}${id}.mp3`);
-      audio.preload = 'auto';
-      audio.onloadeddata = () => {
-        this.audioMap.set(id, audio);
-        resolve();
-      };
-      audio.onerror = () => {
-        console.warn(`Audio ${id}.mp3 not found`);
-        resolve();
-      };
-    });
   }
 
   play(id, force = false) {
@@ -54,9 +43,12 @@ export class AudioManager {
     }
 
     audio.currentTime = 0;
-    audio.play().catch(e => {
-      console.warn('Audio play failed:', e);
-    });
+    const p = audio.play();
+    if (p && p.catch) {
+      p.catch(e => {
+        console.warn('Audio play failed:', e);
+      });
+    }
     this.currentAudio = audio;
   }
 
