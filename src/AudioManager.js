@@ -16,8 +16,9 @@ export class AudioManager {
     const audioIds = [
       'landing-intro',
       'base-small', 'body-block', 'front-legs', 'back-mustache',
-      'head-place', 'ears', 'head-lines', 'ball-place',
-      'complete', 'lift-blessing', 'fortune-shell', 'blessing-complete'
+      'head-block', 'head-place', 'tail', 'ears', 'head-lines',
+      'ball-form', 'ball-place', 'complete', 'lift-blessing',
+      'fortune-shell', 'blessing-complete'
     ];
 
     for (const id of audioIds) {

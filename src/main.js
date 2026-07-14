@@ -388,15 +388,16 @@ document.addEventListener('DOMContentLoaded', () => {
         stepOverlay.classList.add('visible');
         clearTimeout(stepOverlayTimer);
       }
-      if (audioManager && audioManager.enabled) {
-        audioManager.play(step.id);
-      }
     } else {
       // knowledge 为空时，隐藏上方提示区域
       if (stepOverlay) {
         stepOverlay.classList.remove('visible');
         clearTimeout(stepOverlayTimer);
       }
+    }
+
+    if (audioManager && audioManager.enabled) {
+      audioManager.play(step.id);
     }
 
     knowledgeFloat.classList.remove('visible');
