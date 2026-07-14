@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let landing, stagePage, btnModeCamera, btnModeButton, stageContainer;
   let landingModelContainer;
   let stepTitle, stepDesc, stepOverlay, knowledgeFloat, knowledgeText;
-  let btnNext, btnReset, btnScreen, btnShare, btnAudio, btnResetBottom;
+  let btnNext, btnReset, btnScreen, btnAudio, btnResetBottom;
   let completeOverlay, fortuneDisplay, fortuneLabel, fortuneName, fortuneBlessing;
   let loadingIndicator, modelError, errorMessage;
   let progDots;
@@ -60,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnNext = document.getElementById('btn-next');
     btnReset = document.getElementById('btn-reset');
     btnScreen = document.getElementById('btn-screen');
-    btnShare = document.getElementById('btn-share');
     btnAudio = document.getElementById('btn-audio');
     btnResetBottom = document.getElementById('btn-reset-bottom');
     completeOverlay = document.getElementById('complete-overlay');
@@ -135,8 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el.requestFullscreen) el.requestFullscreen();
     else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
   });
-
-  if (btnShare) btnShare.addEventListener('click', generateShareCard);
 
   // 舞台内声音按钮：点击播放当前步骤对应的非遗文案（强制播放，不受 guideMode 限制）
   if (btnAudio) btnAudio.addEventListener('click', () => {
@@ -416,116 +413,5 @@ document.addEventListener('DOMContentLoaded', () => {
     btnNext.disabled = false;
   }
 
-  function generateShareCard() {
-    const fortune = currentFortune;
-    if (!fortune) return;
 
-    const colorHex = '#' + fortune.color.toString(16).padStart(6, '0');
-    const canvas = document.createElement('canvas');
-    canvas.width = 750;
-    canvas.height = 1000;
-    const ctx = canvas.getContext('2d');
-
-    const W = 750, H = 1000;
-
-    const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, '#1a0e08');
-    grad.addColorStop(0.5, '#2a1a10');
-    grad.addColorStop(1, '#1a0e08');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
-
-    ctx.fillStyle = '#D73327';
-    ctx.fillRect(0, 0, W, 6);
-    ctx.fillStyle = '#F1BC36';
-    ctx.fillRect(0, 6, W, 3);
-
-    ctx.fillStyle = '#F1BC36';
-    ctx.fillRect(0, H - 9, W, 3);
-    ctx.fillStyle = '#D73327';
-    ctx.fillRect(0, H - 6, W, 6);
-
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#f5e6d3';
-    ctx.font = 'bold 48px "PingFang SC", "Microsoft YaHei", sans-serif';
-    ctx.fillText('吹糖造物', W / 2, 100);
-
-    ctx.fillStyle = '#a08a72';
-    ctx.font = '18px "PingFang SC", "Microsoft YaHei", sans-serif';
-    ctx.fillText('灵感来自国家级非遗 · 天门糖塑', W / 2, 140);
-
-    ctx.strokeStyle = 'rgba(196,154,108,0.3)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(100, 170);
-    ctx.lineTo(W - 100, 170);
-    ctx.stroke();
-
-    let beastImg = null;
-    try {
-      if (stage && stage.renderer) {
-        const dataUrl = stage.renderer.domElement.toDataURL('image/png');
-        const img = new Image();
-        img.src = dataUrl;
-        if (img.complete && img.naturalWidth > 0) beastImg = img;
-      }
-    } catch { /* skip */ }
-
-    if (beastImg) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(W / 2, 320, 140, 0, Math.PI * 2);
-      ctx.clip();
-      ctx.drawImage(beastImg, W / 2 - 140, 180, 280, 280);
-      ctx.restore();
-    } else {
-      ctx.beginPath();
-      ctx.arc(W / 2, 320, 130, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(196,154,108,0.1)';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(196,154,108,0.3)';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([8, 6]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = '#a08a72';
-      ctx.font = '16px "PingFang SC", "Microsoft YaHei", sans-serif';
-      ctx.fillText('瑞兽·糖塑', W / 2, 330);
-    }
-
-    const circleY = 490;
-    ctx.beginPath();
-    ctx.arc(W / 2, circleY, 72, 0, Math.PI * 2);
-    ctx.fillStyle = colorHex;
-    ctx.fill();
-
-    ctx.strokeStyle = colorHex;
-    ctx.lineWidth = 3;
-    ctx.setLineDash([6, 4]);
-    ctx.beginPath();
-    ctx.arc(W / 2, circleY, 82, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 64px "PingFang SC", "Microsoft YaHei", sans-serif';
-    ctx.fillText(fortune.label, W / 2, circleY + 22);
-
-    ctx.fillStyle = '#f5e6d3';
-    ctx.font = 'bold 28px "PingFang SC", "Microsoft YaHei", sans-serif';
-    ctx.fillText(fortune.name, W / 2, circleY + 130);
-
-    ctx.fillStyle = '#a08a72';
-    ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
-    ctx.fillText(fortune.blessing, W / 2, circleY + 175);
-
-    ctx.fillStyle = 'rgba(160,138,114,0.5)';
-    ctx.font = '14px "PingFang SC", "Microsoft YaHei", sans-serif';
-    ctx.fillText('天门糖塑 · 国家级非物质文化遗产', W / 2, H - 50);
-
-    const link = document.createElement('a');
-    link.download = `吹糖造物_${fortune.label}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  }
 });
