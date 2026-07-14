@@ -3,7 +3,7 @@ import { GestureInput } from './GestureInput.js';
 import { LandingModel } from './LandingModel.js';
 import { getStep, matchesStepGesture, getPhaseIndex } from './stage-content.js';
 import { AudioManager } from './AudioManager.js';
-import modelUrl from './assets/hulushi-web.glb?url';
+const modelUrl = import.meta.env.BASE_URL + 'assets/hulushi-web.glb';
 
 window.addEventListener('error', (event) => {
   console.error('=== Global Error ===');

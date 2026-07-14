@@ -1,6 +1,4 @@
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
-import defaultHandLandmarkerModelUrl from '../runtime/hand_landmarker.task?url';
-
 const FRAME_INTERVAL_MS = 80;
 const ACTION_COOLDOWN_MS = 1150;
 const HOLD_MS = 900;
@@ -8,6 +6,7 @@ const HISTORY_MS = 900;
 const TWO_HAND_HISTORY_MS = 700;
 const RESET_STABLE_MS = 280;
 const DEFAULT_WASM_BASE_URL = import.meta.env.BASE_URL + 'runtime/mediapipe-wasm';
+const DEFAULT_HAND_LANDMARKER_URL = import.meta.env.BASE_URL + 'runtime/hand_landmarker.task';
 
 const GESTURE_THRESHOLDS = {
   pinchDistance: 0.065,
@@ -68,7 +67,7 @@ export class GestureInput {
     onAction,
     onStatus,
     wasmBaseUrl = DEFAULT_WASM_BASE_URL,
-    modelUrl = defaultHandLandmarkerModelUrl,
+    modelUrl = DEFAULT_HAND_LANDMARKER_URL,
   }) {
     this.videoElement = videoElement;
     this.onAction = onAction;
