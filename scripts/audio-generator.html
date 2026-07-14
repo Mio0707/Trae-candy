@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>音频生成器 - 吹糖造物</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #4a200a 0%, #1a0a02 100%); min-height: 100vh; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    h1 { color: #f1bc36; text-align: center; margin-bottom: 20px; font-size: 1.5rem; }
+    .audio-item { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1); }
+    .audio-item .id { color: #e8442a; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+    .audio-item .text { color: #c49a6c; font-size: 0.9rem; line-height: 1.6; margin-bottom: 12px; }
+    .audio-item .actions { display: flex; gap: 10px; }
+    button { padding: 8px 16px; border: none; border-radius: 8px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+    button.play { background: #e8442a; color: #fff; }
+    button.play:hover { background: #d73327; }
+    button.download { background: rgba(255,255,255,0.1); color: #c49a6c; }
+    button.download:hover { background: rgba(255,255,255,0.2); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .progress { color: #f1bc36; font-size: 0.8rem; text-align: center; margin-top: 16px; }
+    .download-all { display: block; width: 100%; padding: 14px; background: #f1bc36; color: #1a0a02; font-weight: 700; font-size: 1rem; margin-top: 20px; }
+    .download-all:hover { background: #e5b02d; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎤 音频生成器</h1>
+    <div id="audio-list"></div>
+    <button class="download-all" onclick="downloadAll()">📥 下载全部音频</button>
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <script>
+    const AUDIO_TEXTS = [
+      { id: "landing-intro", text: "天门糖塑距今已有约1400年历史，曾被列为湖北最美非物质文化遗产。通过手势互动，模拟吹、捏、拉、贴等真实工艺，制作一只属于自己的糖塑瑞兽。" },
+      { id: "base-small", text: "天门糖塑用吹制扩充中空体量，称为泡活：既节省糖料，又能形成圆鼓饱满的外形。" },
+      { id: "body-block", text: "天门糖塑讲究吹塑结合：先吹出中空大体量，再用捏、拉、压、贴完成细节，省糖却显得饱满。" },
+      { id: "front-legs", text: "主体之外的枝节和细部由塑制丰富，这种处理称为头子活；四肢抓住动势和轮廓就能显出精神。" },
+      { id: "back-mustache", text: "天门糖塑常把糖料压成糖片，再通过剪、贴组成衣纹和装饰；薄处微微透亮，厚处色泽更饱满，贴合处还会保留自然接缝。" },
+      { id: "head-block", text: "天门糖塑重在传神：头可以夸张，眼睛和姿态尤其要有精神，让人一眼认出角色的性格。" },
+      { id: "tail", text: "在这件真实瑞兽作品中，尾巴和两只耳朵都用小弹簧连接；轻轻一动，糖片便会微微颤动，让瑞兽更有神气。" },
+      { id: "head-lines", text: "梳齿纹、卷曲线和凸起糖条是常见装饰语言；红、绿、黑与糖本色形成明快热烈的民间色彩。" },
+      { id: "ball-form", text: "天门糖塑善用圆球、糖片、糖条等简单形体组合，以有限糖料塑出丰富层次，这正是艺人的讨巧。" },
+      { id: "ball-place", text: "糖塑曾走进庙会、婚庆和寿诞等生活场景。瑞兽等题材寄托着吉祥、守护和圆满。" },
+      { id: "lift-blessing", text: "天门糖塑植根江汉平原民间生活，作品常以生动造型承载喜庆、吉祥和守护的愿望。" },
+      { id: "blessing-complete", text: "天门糖塑是国家级非物质文化遗产代表性项目；本体验用于文化感受，不等同于真实高温制作教学。" },
+    ];
+
+    const audioCache = {};
+
+    function init() {
+      const list = document.getElementById('audio-list');
+      AUDIO_TEXTS.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'audio-item';
+        div.innerHTML = `
+          <div class="id">${item.id}.mp3</div>
+          <div class="text">${item.text}</div>
+          <div class="actions">
+            <button class="play" onclick="playAudio('${item.id}')">▶ 播放</button>
+            <button class="download" onclick="generateAndDownload('${item.id}')">⬇ 下载</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    async function generateAudio(text) {
+      return new Promise((resolve) => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'zh-CN';
+        utterance.rate = 0.9;
+        
+        const voices = window.speechSynthesis.getVoices();
+        const zhVoice = voices.find(v => v.lang.includes('zh'));
+        if (zhVoice) utterance.voice = zhVoice;
+
+        const audioChunks = [];
+        const mediaRecorder = new MediaRecorder(new MediaStream());
+        
+        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+          resolve(audioBlob);
+        };
+
+        utterance.onstart = () => {
+          const stream = new MediaStream();
+          mediaRecorder.start();
+        };
+
+        utterance.onend = () => {
+          mediaRecorder.stop();
+        };
+
+        window.speechSynthesis.speak(utterance);
+      });
+    }
+
+    async function playAudio(id) {
+      const item = AUDIO_TEXTS.find(t => t.id === id);
+      const utterance = new SpeechSynthesisUtterance(item.text);
+      utterance.lang = 'zh-CN';
+      utterance.rate = 0.9;
+      
+      const voices = window.speechSynthesis.getVoices();
+      const zhVoice = voices.find(v => v.lang.includes('zh'));
+      if (zhVoice) utterance.voice = zhVoice;
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    async function generateAndDownload(id) {
+      const progress = document.getElementById('progress');
+      progress.textContent = `正在生成: ${id}.mp3...`;
+      
+      const item = AUDIO_TEXTS.find(t => t.id === id);
+      try {
+        const blob = await generateAudio(item.text);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${id}.mp3`;
+        a.click();
+        URL.revokeObjectURL(url);
+        progress.textContent = `✅ ${id}.mp3 下载完成`;
+        setTimeout(() => progress.textContent = '', 2000);
+      } catch (e) {
+        progress.textContent = `❌ 生成失败: ${e.message}`;
+      }
+    }
+
+    async function downloadAll() {
+      const progress = document.getElementById('progress');
+      let count = 0;
+      
+      for (const item of AUDIO_TEXTS) {
+        progress.textContent = `正在生成: ${count + 1}/${AUDIO_TEXTS.length} - ${item.id}.mp3`;
+        try {
+          const blob = await generateAudio(item.text);
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${item.id}.mp3`;
+          a.click();
+          URL.revokeObjectURL(url);
+          count++;
+          await new Promise(r => setTimeout(r, 500));
+        } catch (e) {
+          console.error(`生成失败: ${item.id}`, e);
+        }
+      }
+      progress.textContent = `🎉 完成！成功生成 ${count} 个音频文件`;
+    }
+
+    window.speechSynthesis.onvoiceschanged = init;
+    init();
+  </script>
+</body>
+</html>
