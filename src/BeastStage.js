@@ -463,7 +463,7 @@ const ACTIVE_STEP_OVERRIDES = {
   ears: {
     title: '贴上尾巴和耳朵',
     description: '逐渐并拢拇指和食指，让尾巴和两个耳朵贴到瑞兽上。',
-    knowledge: '',
+    knowledge: '在这件真实瑞兽作品中，尾巴和两只耳朵都用小弹簧连接；轻轻一动，糖片便会微微颤动，让瑞兽更有神气',
     visibleGroups: [
       'base',
       'body',
