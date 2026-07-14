@@ -89,9 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnLandingAudio) {
     btnLandingAudio.addEventListener('click', () => {
       guideMode = !guideMode;
-      btnLandingAudio.textContent = guideMode ? '🔊' : '🔇';
+      const audioIcon = btnLandingAudio.querySelector('.audio-icon');
+      const audioLabel = btnLandingAudio.querySelector('.audio-label');
+      if (audioIcon) audioIcon.textContent = guideMode ? '🔊' : '🔇';
+      if (audioLabel) audioLabel.textContent = guideMode ? '讲解中' : '语音讲解';
       btnLandingAudio.classList.toggle('active', guideMode);
-      btnLandingAudio.title = guideMode ? '讲解模式已开启' : '点击开启讲解模式';
+      btnLandingAudio.title = guideMode ? '讲解模式已开启，点击关闭' : '点击开启语音讲解';
 
       if (guideMode) {
         // 开启讲解模式时，立即播放首页介绍

@@ -72,29 +72,39 @@ body {
 
 .landing-audio-btn {
   position: absolute;
-  top: 12px;
+  top: 16px;
   right: 0;
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: rgba(196,154,108,0.1);
-  border: 1px solid rgba(196,154,108,0.2);
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: rgba(196,154,108,0.12);
+  border: 1px solid rgba(196,154,108,0.25);
   color: var(--fg-muted);
-  font-size: 1rem;
+  font-size: 0.75rem;
   cursor: pointer;
-  transition: all 0.25s;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
   display: flex; align-items: center; justify-content: center;
+  gap: 6px;
   z-index: 2;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: inherit;
+  letter-spacing: 1px;
 }
 .landing-audio-btn:hover {
   background: rgba(196,154,108,0.2);
   border-color: rgba(196,154,108,0.4);
-  transform: scale(1.05);
+  transform: translateY(-1px);
+  color: var(--fg);
 }
+.landing-audio-btn:active { transform: scale(0.97); }
 .landing-audio-btn.active {
-  background: rgba(241,188,54,0.15);
-  border-color: rgba(241,188,54,0.4);
+  background: rgba(241,188,54,0.2);
+  border-color: rgba(241,188,54,0.5);
   color: var(--gold);
+  box-shadow: 0 0 16px rgba(241,188,54,0.2);
 }
+.landing-audio-btn .audio-icon { font-size: 0.9rem; }
+.landing-audio-btn .audio-label { font-weight: 600; }
 
 /* Hero: brand as the loudest element */
 .landing-title {
@@ -552,7 +562,10 @@ body {
      ============================================================ -->
 <div id="landing">
   <div class="landing-inner">
-    <button class="landing-audio-btn" id="btn-landing-audio" title="语音讲解">🔇</button>
+    <button class="landing-audio-btn" id="btn-landing-audio" title="点击开启语音讲解">
+      <span class="audio-icon">🔇</span>
+      <span class="audio-label">语音讲解</span>
+    </button>
     <div class="landing-title">吹糖造物</div>
     <div class="landing-sub">国家级非遗 · 天门糖塑</div>
     <div class="landing-model" id="landing-model"></div>
