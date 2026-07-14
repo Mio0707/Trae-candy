@@ -144,39 +144,71 @@ body {
 
 /* CTA: mode choices */
 .landing-choices {
-  display: flex; gap: 48px; justify-content: center;
+  display: flex; gap: 24px; justify-content: center;
   margin-top: 16px;
   animation: fadeUp 0.8s 0.95s cubic-bezier(0.16,1,0.3,1) both;
 }
 
 .choice-btn {
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-  padding: 0;
-  background: transparent;
-  border: none;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 16px 28px;
+  background: rgba(196,154,108,0.06);
+  border: 1px solid rgba(196,154,108,0.15);
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
   font-family: inherit; color: var(--fg);
+}
+.choice-btn:hover { 
+  background: rgba(196,154,108,0.12);
+  border-color: rgba(196,154,108,0.3);
+  transform: translateY(-2px);
+}
+.choice-btn:active { transform: translateY(0) scale(0.98); }
+
+.choice-icon-wrap {
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  font-size: 0;
   position: relative;
 }
-.choice-btn::after {
-  content: ''; position: absolute; bottom: -8px; left: 50%;
-  width: 0; height: 1px;
+.choice-icon-wrap.camera {
+  background: rgba(232,68,42,0.12);
+}
+.choice-icon-wrap.button {
+  background: rgba(241,188,54,0.12);
+}
+.choice-icon-wrap::before {
+  content: '';
+  position: absolute;
+  width: 18px; height: 18px;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+}
+.choice-icon-wrap.camera::before {
+  border-color: var(--red);
+  width: 20px; height: 16px;
+}
+.choice-icon-wrap.camera::after {
+  content: '';
+  position: absolute;
+  width: 6px; height: 6px;
+  background: var(--red);
+  border-radius: 50%;
+  margin-top: 18px;
+}
+.choice-icon-wrap.button::before {
+  border-color: var(--gold);
+  width: 14px; height: 14px;
+}
+.choice-icon-wrap.button::after {
+  content: '';
+  position: absolute;
+  width: 8px; height: 3px;
   background: var(--gold);
-  transform: translateX(-50%);
-  transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+  margin-top: 18px;
 }
-.choice-btn:hover::after { width: 100%; }
-.choice-btn:hover { transform: translateY(-2px); }
-.choice-btn:active { transform: translateY(0) scale(0.97); }
-
-.choice-icon {
-  font-size: 1.5rem;
-  transition: all 0.3s ease;
-}
-.choice-icon.camera { color: var(--red); }
-.choice-icon.button { color: var(--gold); }
-.choice-btn:hover .choice-icon { transform: scale(1.15); }
 
 .choice-label { font-size: 0.95rem; font-weight: 600; letter-spacing: 2px; }
 .choice-hint { font-size: 0.72rem; color: var(--fg-muted); opacity: 0.7; }
@@ -483,9 +515,9 @@ body {
   .landing-model { height: 240px; margin-top: 4px; }
   .landing-divider { height: 24px; margin: 16px 0; }
   .landing-desc { font-size: 0.78rem; line-height: 1.8; white-space: normal; margin-top: 16px; text-align: center; max-width: 100%; }
-  .landing-choices { flex-direction: column; align-items: center; gap: 12px; margin-top: 12px; }
-  .choice-btn { max-width: 260px; padding: 14px 20px; }
-  .choice-icon { font-size: 1.4rem; margin-bottom: 6px; }
+  .landing-choices { gap: 12px; margin-top: 12px; }
+  .choice-btn { padding: 14px 16px; }
+  .choice-icon-wrap { width: 38px; height: 38px; }
   .choice-label { font-size: 0.85rem; }
   .choice-hint { font-size: 0.68rem; }
   .landing-footer { bottom: 20px; font-size: 0.6rem; }
@@ -501,9 +533,11 @@ body {
   .landing-model { height: 200px; }
   .landing-divider { height: 18px; margin: 12px 0; }
   .landing-desc { font-size: 0.72rem; margin-top: 12px; }
-  .choice-btn { max-width: 240px; padding: 12px 18px; }
-  .choice-icon { font-size: 1.2rem; }
-  .choice-label { font-size: 0.8rem; }
+  .landing-choices { gap: 8px; }
+  .choice-btn { padding: 10px 12px; }
+  .choice-icon-wrap { width: 34px; height: 34px; }
+  .choice-label { font-size: 0.78rem; }
+  .choice-hint { font-size: 0.64rem; }
 }
 
 @media (max-width: 380px) {
@@ -513,7 +547,8 @@ body {
   .landing-model { height: 170px; }
   .landing-divider { height: 14px; margin: 10px 0; }
   .landing-desc { font-size: 0.68rem; line-height: 1.7; margin-top: 10px; }
-  .choice-btn { padding: 10px 16px; }
+  .choice-btn { padding: 8px 10px; }
+  .choice-icon-wrap { width: 30px; height: 30px; }
   .choice-hint { font-size: 0.62rem; }
 }
 
@@ -540,12 +575,12 @@ body {
     <div class="landing-model" id="landing-model"></div>
     <div class="landing-choices">
       <button class="choice-btn" id="btn-mode-camera">
-        <div class="choice-icon camera">📷</div>
+        <div class="choice-icon-wrap camera"></div>
         <div class="choice-label">摄像头交互</div>
         <div class="choice-hint">手势驱动 · 沉浸体验</div>
       </button>
       <button class="choice-btn" id="btn-mode-button">
-        <div class="choice-icon button">👆</div>
+        <div class="choice-icon-wrap button"></div>
         <div class="choice-label">按钮交互</div>
         <div class="choice-hint">点击推进 · 轻松体验</div>
       </button>
