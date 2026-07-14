@@ -358,10 +358,9 @@ document.addEventListener('DOMContentLoaded', () => {
         audioManager.play(step.id);
       }
     } else {
-      if (stepTitle) stepTitle.textContent = step.title || '';
-      if (stepDesc) stepDesc.textContent = step.description || '';
+      // knowledge 为空时，隐藏上方提示区域
       if (stepOverlay) {
-        stepOverlay.classList.add('visible');
+        stepOverlay.classList.remove('visible');
         clearTimeout(stepOverlayTimer);
       }
     }
