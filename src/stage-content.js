@@ -25,7 +25,7 @@ export const STAGE_STEPS = [
     description: '先张开手掌准备，再握拳一次，让红色糖团鼓起并定型成底座。',
     stageHint: '握拳，将底座吹起来', sequenceHint: '张开手掌 → 握紧拳头',
     gesture: { actions: ['fist'], resetMode: 'release-fist', recognitionHint: '先张掌，再握拳吹起底座' },
-    knowledge: '天门糖塑用吹制扩充中空体量，称为“泡活”：既节省糖料，又能形成圆鼓饱满的外形。',
+    knowledge: '天门糖塑通过吹气扩充糖块中空体量，称为“泡活”：既节省糖料，又能形成圆鼓饱满的外形',
     animation: 'base-grow',
   },
   {
@@ -33,7 +33,7 @@ export const STAGE_STEPS = [
     description: '先松开拳头，再次握拳，黑色身体糖块出现并落到底座上。',
     stageHint: '握拳，把身体糖块吹起并安放', sequenceHint: '张开手掌 → 握紧拳头',
     gesture: { actions: ['fist'], resetMode: 'release-fist', recognitionHint: '先松拳，再次握拳放置身体' },
-    knowledge: '天门糖塑讲究“吹塑结合”：先吹出中空大体量，再用捏、拉、压、贴完成细节，省糖却显得饱满。',
+    knowledge: '天门糖塑讲究“吹塑结合”：先吹出中空大体量',
     animation: 'body-appear-and-place',
   },
   {
@@ -41,7 +41,7 @@ export const STAGE_STEPS = [
     description: '先合拢拇指和食指，再逐渐张开，让前后脚从黑色身体内部延展出来。',
     stageHint: '张开两指，从身体中拉出四肢', sequenceHint: '两指合拢 → 逐渐张开',
     gesture: { actions: ['thumb-index-spread'], resetMode: 'thumb-index-closed', recognitionHint: '先合拢拇指和食指，再逐渐张开拉出四肢' },
-    knowledge: '主体之外的枝节和细部由塑制丰富，这种处理称为“头子活”；四肢抓住动势和轮廓就能显出精神。',
+    knowledge: '再用捏、拉、压、贴完成细节',
     animation: 'limbs-stretch',
   },
   {
@@ -49,7 +49,7 @@ export const STAGE_STEPS = [
     description: '先张开拇指和食指，再逐渐并拢，让黄色背部糖衣贴到身体上。',
     stageHint: '并拢两指，把黄色糖衣贴合到身体上', sequenceHint: '两指张开 → 逐渐并拢',
     gesture: { actions: ['thumb-index-close'], resetMode: 'thumb-index-open', recognitionHint: '先张开拇指和食指，再逐渐并拢贴上糖衣' },
-    knowledge: '天门糖塑常把糖料压成糖片，再通过剪、贴组成衣纹和装饰；薄处微微透亮，厚处色泽更饱满，贴合处还会保留自然接缝。',
+    knowledge: '"塑"讲究结构和色彩，把糖料压成糖片，再通过剪、贴组成衣纹和装饰',
     animation: 'back-coat-attach',
   },
   {
@@ -57,7 +57,7 @@ export const STAGE_STEPS = [
     description: '张开手掌，让红色头部糖块在空中逐渐出现。',
     stageHint: '张开手掌，让头部糖料逐渐成形', sequenceHint: '收拢手指 → 张开手掌',
     gesture: { actions: ['open'], resetMode: 'closed-hand', recognitionHint: '先收拢手指，再张掌让头部出现' },
-    knowledge: '天门糖塑重在“传神”：头可以夸张，眼睛和姿态尤其要有精神，让人一眼认出角色的性格。',
+    knowledge: '',
     animation: 'head-form',
   },
   {
@@ -65,14 +65,15 @@ export const STAGE_STEPS = [
     description: '先张开手掌准备，再握拳，让头部落到身体前方。',
     stageHint: '握紧拳头，把头部糖块安放到身体上', sequenceHint: '张开手掌 → 握紧拳头',
     gesture: { actions: ['fist'], resetMode: 'release-fist', recognitionHint: '先张掌，再握拳安放头部' },
-    knowledge: '', animation: 'head-place',
+    knowledge: '天门糖塑重在“传神”：头可以夸张，眼睛和姿态尤其要有精神，让人一眼认出角色的性格',
+    animation: 'head-place',
   },
   {
     id: 'tail', phaseId: 'decoration', title: '出现尾巴和耳朵',
     description: '先合拢拇指和食指，再逐渐张开，让尾巴和两个耳朵糖片在空中出现。',
     stageHint: '张开两指，制作尾巴和耳朵糖片', sequenceHint: '两指合拢 → 逐渐张开',
     gesture: { actions: ['thumb-index-spread'], resetMode: 'thumb-index-closed', recognitionHint: '先合拢拇指和食指，再逐渐张开让尾巴和耳朵出现' },
-    knowledge: '在这件真实瑞兽作品中，尾巴和两只耳朵都用小弹簧连接；轻轻一动，糖片便会微微颤动，让瑞兽更有神气。',
+    knowledge: '',
     animation: 'tail-and-ears-form',
   },
   {
@@ -80,14 +81,15 @@ export const STAGE_STEPS = [
     description: '逐渐并拢拇指和食指，让尾巴和两个耳朵贴到瑞兽上。',
     stageHint: '并拢两指，装上带弹簧的尾巴和耳朵', sequenceHint: '两指张开 → 逐渐并拢',
     gesture: { actions: ['thumb-index-close'], resetMode: 'thumb-index-open', recognitionHint: '逐渐并拢拇指和食指，贴上尾巴和耳朵' },
-    knowledge: '', animation: 'tail-and-ears-attach',
+    knowledge: '在这件真实瑞兽作品中，尾巴和两只耳朵都用小弹簧连接；轻轻一动，糖片便会微微颤动，让瑞兽更有神气',
+    animation: 'tail-and-ears-attach',
   },
   {
     id: 'head-lines', phaseId: 'decoration', title: '贴上头部和嘴部糖条',
     description: '先合拢拇指和食指，再逐渐张开，让红绿糖条贴到头部和嘴部。',
     stageHint: '张开两指，搓拉并贴上装饰糖条', sequenceHint: '两指合拢 → 逐渐张开',
     gesture: { actions: ['thumb-index-spread'], resetMode: 'thumb-index-closed', recognitionHint: '先合拢拇指和食指，再逐渐张开贴上糖条' },
-    knowledge: '梳齿纹、卷曲线和凸起糖条是常见装饰语言；红、绿、黑与糖本色形成明快热烈的民间色彩。',
+    knowledge: '梳齿纹、卷曲线和凸起糖条是常见装饰语言',
     animation: 'head-lines-attach',
   },
   {
@@ -95,7 +97,7 @@ export const STAGE_STEPS = [
     description: '张开手掌，让圆球糖料在空中逐渐出现。',
     stageHint: '张开手掌，把糖料团成爪下圆球', sequenceHint: '收拢手指 → 张开手掌',
     gesture: { actions: ['open'], resetMode: 'closed-hand', recognitionHint: '先收拢手指，再张掌让圆球出现' },
-    knowledge: '天门糖塑善用圆球、糖片、糖条等简单形体组合，以有限糖料塑出丰富层次，这正是艺人的“讨巧”。',
+    knowledge: '',
     animation: 'ball-form',
   },
   {
@@ -103,7 +105,7 @@ export const STAGE_STEPS = [
     description: '先张开手掌准备，再握拳，让圆球落到瑞兽爪下。',
     stageHint: '握紧拳头，把圆球安放到瑞兽爪下', sequenceHint: '张开手掌 → 握紧拳头',
     gesture: { actions: ['fist'], resetMode: 'release-fist', recognitionHint: '先张掌，再握拳安放圆球' },
-    knowledge: '糖塑曾走进庙会、婚庆和寿诞等生活场景。瑞兽等题材寄托着吉祥、守护和圆满。',
+    knowledge: '天门糖塑善用圆球、糖条等简单形体组合，以有限糖料塑出丰富层次，这正是艺人的"讨巧"',
     animation: 'ball-place',
   },
   {
@@ -111,14 +113,15 @@ export const STAGE_STEPS = [
     description: '瑞兽主体完成，整件作品将自动旋转一圈并进入赐福。',
     stageHint: '', sequenceHint: '',
     gesture: { actions: [], resetMode: null, recognitionHint: '瑞兽正在自动旋转展示' },
-    knowledge: '', animation: 'showcase-spin', autoAdvance: true,
+    knowledge: '红、绿、黑与糖本色形成天门糖塑明快热烈的民间色彩',
+    animation: 'showcase-spin', autoAdvance: true,
   },
   {
     id: 'lift-blessing', phaseId: 'blessing', title: '托起瑞兽',
     description: '先在瑞兽上方张开手掌，再向下移动到瑞兽下方并停留。',
     stageHint: '张掌向下移动，瑞兽给你带来了一份祝福', sequenceHint: '瑞兽上方张掌 → 向下移动并停留',
     gesture: { actions: ['lift'], resetMode: 'lift-ready', recognitionHint: '在瑞兽上方张掌，向下托住后保持片刻' },
-    knowledge: '天门糖塑植根江汉平原民间生活，作品常以生动造型承载喜庆、吉祥和守护的愿望。',
+    knowledge: '糖塑曾走进庙会、婚庆和寿诞等生活场景',
     animation: 'lift-and-bless',
   },
   {
@@ -126,7 +129,8 @@ export const STAGE_STEPS = [
     description: '等待祝福粒子完整显形，再握拳收拢，把这份祝福带走。',
     stageHint: '握紧拳头，将祝福收下', sequenceHint: '张开手掌 → 握紧拳头',
     gesture: { actions: ['fist'], resetMode: 'release-fist', recognitionHint: '粒子成形后握拳收下祝福' },
-    knowledge: '', animation: 'fortune-particles',
+    knowledge: '天门糖塑植根江汉平原民间生活，作品常以生动造型承载喜庆、吉祥和守护的愿望',
+    animation: 'fortune-particles',
   },
   {
     id: 'blessing-complete', phaseId: 'blessing', title: '祝福完成',
