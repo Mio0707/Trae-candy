@@ -94,6 +94,14 @@ document.addEventListener('DOMContentLoaded', () => {
       btnLandingAudio.textContent = guideMode ? '🔊' : '🔇';
       btnLandingAudio.classList.toggle('active', guideMode);
       btnLandingAudio.title = guideMode ? '讲解模式已开启' : '点击开启讲解模式';
+
+      if (guideMode) {
+        // 开启讲解模式时，立即播放首页介绍
+        playLandingAudio();
+      } else {
+        // 关闭时停止播放
+        if (audioManager) audioManager.stop();
+      }
     });
   }
 
@@ -182,8 +190,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function playLandingAudio() {
-    if (audioManager && audioManager.enabled) {
-      audioManager.play('landing-intro');
+    if (audioManager) {
+      audioManager.play('landing-intro', true);
     }
   }
 
